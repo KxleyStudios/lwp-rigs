@@ -101,11 +101,25 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
+    position: relative;
 }
 
 .rig-icon {
     width: 40px;
     height: 40px;
+}
+
+/* Version Badge Styling */
+.version-badge {
+    font-size: 0.8rem;
+    background-color: #4285F4;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    position: relative;
+    top: -5px;
+    margin-left: 5px;
+    font-weight: bold;
 }
 
 /* Download Button Styling */
@@ -196,6 +210,11 @@ footer {
     
     .rig-box {
         width: 90%;
+    }
+    
+    .version-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
     }
 }
 

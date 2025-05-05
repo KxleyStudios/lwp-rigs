@@ -74,32 +74,10 @@
     
     <footer>
         &copy; Studio VEGA | Learning With Pibby: Armageddon (2026) | Kxley's Rig Pack
+        <div class="footer-tos">
+            <strong>Terms of Use:</strong> Credit Kxley • Don’t claim as your own • No re-releases • No NSFW • No fake leaks
+        </div>
     </footer>
-    <!-- Terms of Use Button & Modal -->
-<button id="tos-button">Terms of Use</button>
 
-<div id="tos-modal">
-  <div class="tos-content">
-    <span class="close">&times;</span>
-    <h2>Terms of Use</h2>
-    <ul>
-      <li>Credit <strong>Kxley</strong> (creator of the rigs)</li>
-      <li>Do not claim as your own</li>
-      <li>Do not re-release (even with edits or added parts)</li>
-      <li>No NSFW usage</li>
-      <li>Do not use for fake "Learning With Pibby" leaks</li>
-    </ul>
-  </div>
-</div>
-
-<script>
-  const modal = document.getElementById("tos-modal");
-  const btn = document.getElementById("tos-button");
-  const span = document.querySelector(".close");
-
-  btn.onclick = () => modal.style.display = "block";
-  span.onclick = () => modal.style.display = "none";
-  window.onclick = e => { if (e.target == modal) modal.style.display = "none"; };
-</script>
 </body>
 </html>

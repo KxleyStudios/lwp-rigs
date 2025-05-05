@@ -163,6 +163,12 @@ body {
     cursor: default;
 }
 
+.footer-tos {
+    margin-top: 15px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .download-btn.coming-soon:hover {
     transform: none;
     box-shadow: none;

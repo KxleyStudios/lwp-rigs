@@ -1,0 +1,209 @@
+/* Custom Font Declaration */
+@font-face {
+    font-family: 'SaldaSoft Black';
+    src: url('../fonts/SaldaSoft-Black.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* General Page Styling */
+body {
+    font-family: 'SaldaSoft Black', 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(135deg, #a3e8ff 0%, #f0c5ff 100%);
+    background-image: url('../images/background.png');
+    background-size: cover;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    color: #222;
+}
+
+/* Header Section */
+.header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-shadow: 3px 3px 5px rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.sub-title {
+    font-size: 2.5rem;
+    margin-top: 0;
+    color: #000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Main Container */
+.container {
+    display: flex;
+    justify-content: space-around;
+    width: 90%;
+    max-width: 1200px;
+    flex-wrap: wrap;
+    margin-bottom: 50px;
+}
+
+/* Character Rig Boxes */
+.rig-box {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    width: 350px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    margin: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rig-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* Character Image Container */
+.character {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character img {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.character img:hover {
+    transform: scale(1.05);
+}
+
+/* Rig Name with Icon */
+.rig-name {
+    font-size: 2rem;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.rig-icon {
+    width: 40px;
+    height: 40px;
+}
+
+/* Download Button Styling */
+.download-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.download-btn {
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #000;
+}
+
+.download-btn:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+/* Google Drive Button */
+.download-btn.drive {
+    border-color: #4285F4;
+    color: #4285F4;
+}
+
+.download-btn.drive:hover {
+    background-color: #4285F4;
+    color: white;
+}
+
+/* MediaFire Button */
+.download-btn.mediafire {
+    border-color: #1299F3;
+    color: #1299F3;
+}
+
+.download-btn.mediafire:hover {
+    background-color: #1299F3;
+    color: white;
+}
+
+/* Coming Soon Button */
+.download-btn.coming-soon {
+    border-color: #888;
+    color: #888;
+    cursor: default;
+}
+
+.download-btn.coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    padding: 15px 0;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.5rem;
+    }
+    
+    .sub-title {
+        font-size: 1.8rem;
+    }
+    
+    .rig-box {
+        width: 90%;
+    }
+}
+
+/* Animation for Download Buttons */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.download-btn:not(.coming-soon):hover {
+    animation: pulse 1s infinite;
+}

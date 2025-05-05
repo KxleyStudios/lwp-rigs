@@ -4,7 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning with Pibby RIG PACK</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    
+    <!-- Custom Font Preload -->
+    <link rel="preload" href="fonts/SaldaSoft-Black.otf" as="font" type="font/otf" crossorigin>
+    
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Inline Font Loading as Backup -->
+    <style>
+        @font-face {
+            font-family: 'SaldaSoft Black';
+            src: url('fonts/SaldaSoft-Black.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        body {
+            font-family: 'SaldaSoft Black', 'Comic Sans MS', cursive, sans-serif;
+        }
+    </style>
 </head>
 <body>
     <div class="header">

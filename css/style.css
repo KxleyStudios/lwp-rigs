@@ -1,9 +1,11 @@
 /* Custom Font Declaration */
 @font-face {
     font-family: 'SaldaSoft Black';
-    src: url('../fonts/SaldaSoft-Black.otf') format('opentype');
+    src: url('../fonts/SaldaSoft-Black.otf') format('opentype'),
+         url('../fonts/SaldaSoft-Black.otf') format('otf');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 
 /* General Page Styling */

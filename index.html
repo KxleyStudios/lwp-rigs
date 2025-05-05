@@ -49,7 +49,7 @@
             </div>
             <div class="rig-name">
                 <img src="images/pibby-icon.png" alt="Pibby Icon" class="rig-icon">
-                <span>PibbyRig</span>
+                <span>Pibby Rig</span>
             </div>
             <div class="download-buttons">
                 <a href="https://drive.google.com/drive/folders/1KmAblnuWKRtile_6KGr1a42L5HRGpaR3?usp=sharing" class="download-btn drive">Google Drive</a>
@@ -64,7 +64,7 @@
             </div>
             <div class="rig-name">
                 <img src="images/bunbun-icon.png" alt="Bun Bun Icon" class="rig-icon">
-                <span>BunBunRig</span>
+                <span>BunBun Rig</span>
             </div>
             <div class="download-buttons">
                 <div class="download-btn coming-soon">Coming Soon</div>
@@ -75,5 +75,31 @@
     <footer>
         &copy; Studio VEGA | Learning With Pibby: Armageddon (2026) | Kxley's Rig Pack
     </footer>
+    <!-- Terms of Use Button & Modal -->
+<button id="tos-button">Terms of Use</button>
+
+<div id="tos-modal">
+  <div class="tos-content">
+    <span class="close">&times;</span>
+    <h2>Terms of Use</h2>
+    <ul>
+      <li>Credit <strong>Kxley</strong> (creator of the rigs)</li>
+      <li>Do not claim as your own</li>
+      <li>Do not re-release (even with edits or added parts)</li>
+      <li>No NSFW usage</li>
+      <li>Do not use for fake "Learning With Pibby" leaks</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("tos-modal");
+  const btn = document.getElementById("tos-button");
+  const span = document.querySelector(".close");
+
+  btn.onclick = () => modal.style.display = "block";
+  span.onclick = () => modal.style.display = "none";
+  window.onclick = e => { if (e.target == modal) modal.style.display = "none"; };
+</script>
 </body>
 </html>

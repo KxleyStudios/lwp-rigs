@@ -24,6 +24,15 @@ body {
     color: #222;
 }
 
+/* Main Content Wrapper */
+.main-content {
+    flex: 1 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 /* Header Section */
 .header {
     text-align: center;
@@ -48,12 +57,13 @@ body {
 
 /* Main Container */
 .container {
+    flex: 1 0 auto;
     display: flex;
     justify-content: space-around;
     width: 90%;
     max-width: 1200px;
     flex-wrap: wrap;
-    margin-bottom: 50px;
+    margin: 0 auto 50px auto;
 }
 
 /* Character Rig Boxes */
@@ -148,7 +158,6 @@ body {
     box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 }
 
-/* Google Drive Button */
 .download-btn.drive {
     border-color: #4285F4;
     color: #4285F4;
@@ -159,7 +168,6 @@ body {
     color: white;
 }
 
-/* MediaFire Button */
 .download-btn.mediafire {
     border-color: #1299F3;
     color: #1299F3;
@@ -170,22 +178,21 @@ body {
     color: white;
 }
 
-/* Coming Soon Button */
 .download-btn.coming-soon {
     border-color: #888;
     color: #888;
     cursor: default;
 }
 
+.download-btn.coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .footer-tos {
     margin-top: 15px;
     font-size: 0.9em;
     opacity: 0.8;
-}
-
-.download-btn.coming-soon:hover {
-    transform: none;
-    box-shadow: none;
 }
 
 /* Footer */
@@ -215,6 +222,15 @@ footer {
     .version-badge {
         font-size: 0.7rem;
         padding: 2px 6px;
+    }
+
+    .changelog-toggle,
+    .submit-comment {
+        font-size: 0.9rem;
+    }
+
+    .comment-header {
+        flex-direction: column;
     }
 }
 
@@ -428,20 +444,4 @@ footer {
     border-radius: 8px;
     background-color: #ffebee;
     font-size: 0.95rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .rig-box {
-        width: 90%;
-    }
-    
-    .changelog-toggle,
-    .submit-comment {
-        font-size: 0.9rem;
-    }
-    
-    .comment-header {
-        flex-direction: column;
-    }
 }

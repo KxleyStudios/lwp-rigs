@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
         authDomain: "pibby-rig-comments.firebaseapp.com",
-        projectId: "pibby-rig-comments",
+        projectId: "pibby-rig-comments", 
         storageBucket: "pibby-rig-comments.firebasestorage.app",
         messagingSenderId: "472256862793",
         appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
@@ -130,7 +130,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Welcome Popup Functionality
+    // Create animated Pibby character
+    const createAnimatedPibby = () => {
+        const animatedPibby = document.createElement('div');
+        animatedPibby.className = 'animated-pibby';
+        
+        // Use the pibby.png image from images directory
+        const pibbyImg = document.createElement('img');
+        pibbyImg.src = 'images/pibby-fall.png';
+        pibbyImg.alt = 'Pibby Character';
+        
+        animatedPibby.appendChild(pibbyImg);
+        document.body.appendChild(animatedPibby);
+        
+        return animatedPibby;
+    };
+    
+    // Welcome Popup with Animated Pibby
     // Create the popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
@@ -153,16 +169,60 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
     
+    // Create animated Pibby
+    const animatedPibby = createAnimatedPibby();
+    
+    // Initial position for Pibby (above the viewport)
+    animatedPibby.style.position = 'fixed';
+    animatedPibby.style.left = '50%';
+    animatedPibby.style.top = '-150px'; // Start above the viewport
+    animatedPibby.style.transform = 'translateX(-50%)';
+    animatedPibby.style.zIndex = '1001'; // Above the popup
+    animatedPibby.style.transition = 'top 1s ease-in, opacity 0.5s ease';
+    
+    // Function to animate Pibby falling from ceiling
+    const animatePibbyFalling = () => {
+        setTimeout(() => {
+            animatedPibby.style.top = '100px'; // Fall to this position
+        }, 500);
+    };
+    
+    // Function to animate Pibby sliding up and then falling down
+    const animatePibbySlideUpAndFall = () => {
+        // First slide up quickly
+        animatedPibby.style.transition = 'top 0.5s ease-out';
+        animatedPibby.style.top = '-50px';
+        
+        // Then after popup is gone, fall down and fade out
+        setTimeout(() => {
+            animatedPibby.style.transition = 'top 1s ease-in, opacity 0.8s ease-out';
+            animatedPibby.style.top = '120vh'; // Fall beyond the bottom of viewport
+            animatedPibby.style.opacity = '0'; // Fade out while falling
+            
+            // Remove Pibby from DOM after animation completes
+            setTimeout(() => {
+                if (animatedPibby.parentNode) {
+                    animatedPibby.parentNode.removeChild(animatedPibby);
+                }
+            }, 1000);
+        }, 600);
+    };
+    
+    // Animate Pibby when popup appears
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        animatePibbyFalling();
+    }, 300);
+    
     // Add click event to the OK button
     document.getElementById('popup-ok-btn').addEventListener('click', function() {
+        // Start slide up animation for Pibby
+        animatePibbySlideUpAndFall();
+        
+        // Fade out popup
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();
         }, 300); // Remove after fade animation completes
     });
-    
-    // Show popup with a slight delay for better user experience
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-    }, 300);
 });

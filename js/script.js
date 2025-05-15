@@ -129,4 +129,40 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     }
+    
+    // Welcome Popup Functionality
+    // Create the popup overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.className = 'popup-container';
+    
+    // Create the popup content
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h2>Welcome to Pibby Rig Pack!</h2>
+            <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
+            <p>Thank you for reading and have fun with my rigs!</p>
+            <button id="popup-ok-btn" class="popup-button">OK</button>
+        </div>
+    `;
+    
+    // Append popup to overlay and overlay to body
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    
+    // Add click event to the OK button
+    document.getElementById('popup-ok-btn').addEventListener('click', function() {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+        }, 300); // Remove after fade animation completes
+    });
+    
+    // Show popup with a slight delay for better user experience
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+    }, 300);
 });

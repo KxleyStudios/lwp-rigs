@@ -886,3 +886,48 @@ footer {
         padding: 10px 15px;
     }
 }
+
+.custom-cursor-area {
+    cursor: none; /* Hide the default cursor */
+}
+
+.cursor {
+    width: 32px;
+    height: 32px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* Ensures the custom cursor doesn't interfere with clicks */
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.cursor-default {
+    background-image: url('images/cursor-default.png');
+}
+
+.cursor-pointer {
+    background-image: url('images/cursor-pointer.png');
+}
+
+.cursor-text {
+    background-image: url('images/cursor-text.png');
+}
+
+.cursor-clicking {
+    background-image: url('images/cursor-clicking.png');
+    transform: scale(1.1); /* Optional: add a slight scale effect when clicking */
+}
+
+/* Define clickable and selectable elements */
+.clickable {
+    cursor: none !important; /* Override any cursor styles */
+}
+
+/* Adding cursor-text class to text elements for text selection cursor */
+input, textarea, [contenteditable="true"], .selectable-text {
+    cursor: none !important;
+}

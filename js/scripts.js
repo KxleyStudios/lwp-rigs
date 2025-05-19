@@ -1,5 +1,6 @@
+// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Firebase
+    // Previous Firebase initialization code
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
         authDomain: "pibby-rig-comments.firebaseapp.com",
@@ -12,6 +13,30 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const commentsCollection = db.collection('pibbyComments');
+    
+    // Tab Navigation functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Get the tab to activate
+            const tabToActivate = button.getAttribute('data-tab');
+            
+            // Deactivate all tabs
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Activate the selected tab
+            button.classList.add('active');
+            document.getElementById(`${tabToActivate}-tab`).classList.remove('hidden');
+            
+            // If comments tab is selected, load comments
+            if(tabToActivate === 'comments') {
+                loadComments();
+            }
+        });
+    });
     
     // Changelog toggle functionality
     const changelogToggle = document.querySelector('.changelog-toggle');
@@ -36,7 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const commentsContainer = document.querySelector('.comments-container');
     
     if (submitCommentBtn && commenterNameInput && commentInput && commentsContainer) {
-        loadComments();
+        // Only load comments if we're on the comments tab initially
+        if (!document.getElementById('comments-tab').classList.contains('hidden')) {
+            loadComments();
+        }
         
         submitCommentBtn.addEventListener('click', function() {
             const name = commenterNameInput.value.trim();

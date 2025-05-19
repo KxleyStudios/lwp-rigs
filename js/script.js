@@ -130,50 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Create animated Pibby character
-    const createAnimatedPibby = () => {
-        const animatedPibby = document.createElement('div');
-        animatedPibby.className = 'animated-pibby';
-        
-        // Use the pibby.png image from images directory
-        const pibbyImg = document.createElement('img');
-        pibbyImg.src = 'images/pibby-fall.png';
-        pibbyImg.alt = 'Pibby Character';
-        
-        animatedPibby.appendChild(pibbyImg);
-        document.body.appendChild(animatedPibby);
-        
-        return animatedPibby;
-    };
-    
-    // Disable scrolling and page interaction
-    function disablePage() {
-        // Create a div to block interactions
-        const blocker = document.createElement('div');
-        blocker.id = 'page-blocker';
-        blocker.style.position = 'fixed';
-        blocker.style.top = '0';
-        blocker.style.left = '0';
-        blocker.style.width = '100%';
-        blocker.style.height = '100%';
-        blocker.style.backgroundColor = 'rgba(0,0,0,0)'; // Transparent but blocks interaction
-        blocker.style.zIndex = '999';
-        document.body.appendChild(blocker);
-        
-        // Also disable scrolling
-        document.body.style.overflow = 'hidden';
-    }
-    
-    // Enable scrolling and page interaction
-    function enablePage() {
-        const blocker = document.getElementById('page-blocker');
-        if (blocker) {
-            blocker.parentNode.removeChild(blocker);
-        }
-        document.body.style.overflow = '';
-    }
-    
-    // Welcome Popup with Animated Pibby and Timer
+    // Welcome Popup (without Pibby animation)
     // Create the popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
@@ -217,52 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
     
-    // Create animated Pibby
-    const animatedPibby = createAnimatedPibby();
-    
-    // Initial position for Pibby (above the viewport)
-    animatedPibby.style.position = 'fixed';
-    animatedPibby.style.left = '50%';
-    animatedPibby.style.top = '-150px'; // Start above the viewport
-    animatedPibby.style.transform = 'translateX(-50%)';
-    animatedPibby.style.zIndex = '1001'; // Above the popup
-    animatedPibby.style.transition = 'top 1s ease-in, opacity 0.5s ease';
-    
-    // Function to animate Pibby falling from ceiling
-    const animatePibbyFalling = () => {
-        setTimeout(() => {
-            animatedPibby.style.top = '100px'; // Fall to this position
-        }, 500);
-    };
-    
-    // Function to animate Pibby sliding up and then falling down
-    const animatePibbySlideUpAndFall = () => {
-        // First slide up quickly
-        animatedPibby.style.transition = 'top 0.5s ease-out';
-        animatedPibby.style.top = '-50px';
-        
-        // Then after popup is gone, fall down and fade out
-        setTimeout(() => {
-            animatedPibby.style.transition = 'top 1s ease-in, opacity 0.8s ease-out';
-            animatedPibby.style.top = '120vh'; // Fall beyond the bottom of viewport
-            animatedPibby.style.opacity = '0'; // Fade out while falling
-            
-            // Remove Pibby from DOM after animation completes
-            setTimeout(() => {
-                if (animatedPibby.parentNode) {
-                    animatedPibby.parentNode.removeChild(animatedPibby);
-                }
-            }, 1000);
-        }, 600);
-    };
-    
     // Disable page interaction while popup is active
-    disablePage();
+    document.body.style.overflow = 'hidden';
     
-    // Animate Pibby when popup appears
+    // Make popup visible with animation
     setTimeout(() => {
         overlay.style.opacity = '1';
-        animatePibbyFalling();
     }, 300);
     
     // Timer functionality
@@ -292,15 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
     okButton.addEventListener('click', function() {
         if (okButton.disabled) return;
         
-        // Start slide up animation for Pibby
-        animatePibbySlideUpAndFall();
-        
         // Fade out popup
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();
             // Enable page interaction
-            enablePage();
+            document.body.style.overflow = '';
         }, 300); // Remove after fade animation completes
     });
 });

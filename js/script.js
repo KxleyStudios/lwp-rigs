@@ -146,7 +146,34 @@ document.addEventListener('DOMContentLoaded', function() {
         return animatedPibby;
     };
     
-    // Welcome Popup with Animated Pibby
+    // Disable scrolling and page interaction
+    function disablePage() {
+        // Create a div to block interactions
+        const blocker = document.createElement('div');
+        blocker.id = 'page-blocker';
+        blocker.style.position = 'fixed';
+        blocker.style.top = '0';
+        blocker.style.left = '0';
+        blocker.style.width = '100%';
+        blocker.style.height = '100%';
+        blocker.style.backgroundColor = 'rgba(0,0,0,0)'; // Transparent but blocks interaction
+        blocker.style.zIndex = '999';
+        document.body.appendChild(blocker);
+        
+        // Also disable scrolling
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Enable scrolling and page interaction
+    function enablePage() {
+        const blocker = document.getElementById('page-blocker');
+        if (blocker) {
+            blocker.parentNode.removeChild(blocker);
+        }
+        document.body.style.overflow = '';
+    }
+    
+    // Welcome Popup with Animated Pibby and Timer
     // Create the popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
@@ -155,13 +182,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const popup = document.createElement('div');
     popup.className = 'popup-container';
     
-    // Create the popup content
+    // Create the popup content with rules and original message
     popup.innerHTML = `
         <div class="popup-content">
             <h2>Welcome to Pibby Rig Pack!</h2>
             <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
+            
+            <div class="rules-container">
+                <h3>Terms of Use:</h3>
+                <ul class="rules-list">
+                    <li>Credit Kxley</li>
+                    <li>Don't claim as your own</li>
+                    <li>No re-releases</li>
+                    <li>No NSFW</li>
+                    <li>No fake leaks</li>
+                </ul>
+            </div>
+            
             <p>Thank you for reading and have fun with my rigs!</p>
-            <button id="popup-ok-btn" class="popup-button">OK</button>
+            
+            <div class="timer-container">
+                <p>Please read the rules carefully.</p>
+                <p>You can continue in: <span id="timer-countdown">30</span> seconds</p>
+                <div class="timer-bar-container">
+                    <div id="timer-bar" class="timer-bar"></div>
+                </div>
+            </div>
+            
+            <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
         </div>
     `;
     
@@ -208,14 +256,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 600);
     };
     
+    // Disable page interaction while popup is active
+    disablePage();
+    
     // Animate Pibby when popup appears
     setTimeout(() => {
         overlay.style.opacity = '1';
         animatePibbyFalling();
     }, 300);
     
+    // Timer functionality
+    const timerEl = document.getElementById('timer-countdown');
+    const timerBar = document.getElementById('timer-bar');
+    const okButton = document.getElementById('popup-ok-btn');
+    let timeLeft = 30;
+    
+    // Update timer every second
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        
+        // Update timer bar width
+        const percentLeft = (timeLeft / 30) * 100;
+        timerBar.style.width = `${percentLeft}%`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerEl.parentElement.textContent = 'You can continue now!';
+            okButton.disabled = false;
+            okButton.classList.add('active');
+        }
+    }, 1000);
+    
     // Add click event to the OK button
-    document.getElementById('popup-ok-btn').addEventListener('click', function() {
+    okButton.addEventListener('click', function() {
+        if (okButton.disabled) return;
+        
         // Start slide up animation for Pibby
         animatePibbySlideUpAndFall();
         
@@ -223,6 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();
+            // Enable page interaction
+            enablePage();
         }, 300); // Remove after fade animation completes
     });
 });

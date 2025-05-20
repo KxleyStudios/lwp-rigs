@@ -667,9 +667,11 @@ footer {
 /* Disabled button state */
 .popup-button[disabled] {
     background-color: #ccc;
-    cursor: not-allowed;
+    cursor: default;
+    pointer-events: none; /* This prevents clicking without showing the not-allowed cursor */
     transform: none !important;
     box-shadow: none !important;
+    opacity: 0.7; /* Adding slight opacity to indicate it's disabled */
 }
 
 .popup-button.active {
@@ -892,8 +894,8 @@ footer {
 }
 
 .cursor {
-    width: 64px;
-    height: 64px;
+    width: 32px;
+    height: 32px;
     position: fixed;
     top: 0;
     left: 0;

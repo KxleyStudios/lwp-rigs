@@ -903,22 +903,30 @@ footer {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    /* Fix: Add fallback cursor shapes in case images don't load */
+    background-color: transparent;
 }
 
 .cursor-default {
-    background-image: url('images/cursor-default.png');
+    background-image: url('../images/cursor-default.png');
+    /* Fallback in case image doesn't load */
+    cursor: default;
 }
 
 .cursor-pointer {
-    background-image: url('images/cursor-pointer.png');
+    background-image: url('../images/cursor-pointer.png');
+    /* Fallback in case image doesn't load */
+    cursor: pointer;
 }
 
 .cursor-text {
-    background-image: url('images/cursor-text.png');
+    background-image: url('../images/cursor-text.png');
+    /* Fallback in case image doesn't load */
+    cursor: text;
 }
 
 .cursor-clicking {
-    background-image: url('images/cursor-clicking.png');
+    background-image: url('../images/cursor-clicking.png');
     transform: scale(1.1); /* Optional: add a slight scale effect when clicking */
 }
 
@@ -930,4 +938,9 @@ footer {
 /* Adding cursor-text class to text elements for text selection cursor */
 input, textarea, [contenteditable="true"], .selectable-text {
     cursor: none !important;
+}
+
+/* Fix: Add a style for when the custom cursor is disabled */
+.cursor-disabled {
+    display: none !important;
 }

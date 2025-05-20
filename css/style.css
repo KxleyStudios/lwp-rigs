@@ -892,8 +892,8 @@ footer {
 }
 
 .cursor {
-    width: 32px;
-    height: 32px;
+    width: 64px;
+    height: 64px;
     position: fixed;
     top: 0;
     left: 0;

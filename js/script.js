@@ -1,6 +1,6 @@
 // Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Previous Firebase initialization code
+    // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
         authDomain: "pibby-rig-comments.firebaseapp.com",
@@ -10,9 +10,33 @@ document.addEventListener('DOMContentLoaded', function() {
         appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
     };
     
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const commentsCollection = db.collection('pibbyComments');
+    // Test Firebase connection
+    try {
+        if (typeof firebase === 'undefined') {
+            throw new Error("Firebase SDK not loaded");
+        }
+
+        if (firebase.apps.length === 0) {
+            firebase.initializeApp({
+                apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
+                authDomain: "pibby-rig-comments.firebaseapp.com",
+                projectId: "pibby-rig-comments", 
+                storageBucket: "pibby-rig-comments.firebasestorage.app",
+                messagingSenderId: "472256862793",
+                appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
+            });
+        }
+
+        firebase.firestore().collection('pibbyComments').limit(1).get()
+            .then(snap => {
+                console.log("Connection successful!", snap.size);
+            })
+            .catch(error => {
+                console.error("Firebase error:", error);
+            });
+    } catch(e) {
+        console.error("Firebase init error:", e);
+    }
     
     // Tab Navigation functionality
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -162,57 +186,94 @@ document.addEventListener('DOMContentLoaded', function() {
         if (commentsContainer) {
             commentsContainer.innerHTML = '<div class="loading-comments">Loading comments...</div>';
             
-            // First get all top-level comments (those without a parentId)
-            commentsCollection.where('parentId', '==', null).orderBy('timestamp', 'desc').get()
-                .then((querySnapshot) => {
-                    commentsContainer.innerHTML = '';
-                    
-                    if (querySnapshot.empty) {
-                        commentsContainer.innerHTML = '<div class="no-comments">No comments yet! Be the first to leave feedback.</div>';
-                        return;
-                    }
-                    
-                    // Process all top-level comments
-                    let promises = [];
-                    querySnapshot.forEach((doc) => {
-                        const commentData = doc.data();
-                        const commentId = doc.id;
+            // Debug: Log to verify Firebase is initialized
+            console.log("Firebase initialized:", firebase.app().name);
+            console.log("Firestore reference:", db);
+            
+            try {
+                // First get all top-level comments (those without a parentId)
+                commentsCollection.where('parentId', '==', null).orderBy('timestamp', 'desc').get()
+                    .then((querySnapshot) => {
+                        commentsContainer.innerHTML = '';
                         
-                        // If the comment has replies, fetch them
-                        if (commentData.replies && commentData.replies.length > 0) {
-                            const promise = getCommentReplies(commentData.replies)
-                                .then(replies => {
-                                    const commentEl = createCommentElement(
-                                        commentData.name,
-                                        commentData.date,
-                                        commentData.content,
-                                        commentId,
-                                        commentData.isRigMaker,
-                                        replies
-                                    );
-                                    commentsContainer.appendChild(commentEl);
-                                });
-                            promises.push(promise);
-                        } else {
-                            const commentEl = createCommentElement(
-                                commentData.name,
-                                commentData.date,
-                                commentData.content,
-                                commentId,
-                                commentData.isRigMaker,
-                                []
-                            );
-                            commentsContainer.appendChild(commentEl);
+                        if (querySnapshot.empty) {
+                            commentsContainer.innerHTML = '<div class="no-comments">No comments yet! Be the first to leave feedback.</div>';
+                            return;
                         }
+                        
+                        // Process all top-level comments
+                        let promises = [];
+                        querySnapshot.forEach((doc) => {
+                            const commentData = doc.data();
+                            const commentId = doc.id;
+                            
+                            // If the comment has replies, fetch them
+                            if (commentData.replies && commentData.replies.length > 0) {
+                                const promise = getCommentReplies(commentData.replies)
+                                    .then(replies => {
+                                        const commentEl = createCommentElement(
+                                            commentData.name,
+                                            commentData.date,
+                                            commentData.content,
+                                            commentId,
+                                            commentData.isRigMaker,
+                                            replies
+                                        );
+                                        commentsContainer.appendChild(commentEl);
+                                    });
+                                promises.push(promise);
+                            } else {
+                                const commentEl = createCommentElement(
+                                    commentData.name,
+                                    commentData.date,
+                                    commentData.content,
+                                    commentId,
+                                    commentData.isRigMaker,
+                                    []
+                                );
+                                commentsContainer.appendChild(commentEl);
+                            }
+                        });
+                        
+                        // Wait for all reply fetches to complete
+                        return Promise.all(promises);
+                    })
+                    .catch((error) => {
+                        console.error("Error getting comments: ", error);
+                        commentsContainer.innerHTML = '<div class="comments-error">Error loading comments. Please refresh the page to try again.</div>';
+                        
+                        // Add a retry button
+                        const retryButton = document.createElement('button');
+                        retryButton.textContent = 'Retry Loading Comments';
+                        retryButton.className = 'retry-button';
+                        retryButton.addEventListener('click', () => loadComments());
+                        commentsContainer.appendChild(retryButton);
                     });
-                    
-                    // Wait for all reply fetches to complete
-                    return Promise.all(promises);
-                })
-                .catch((error) => {
-                    console.error("Error getting comments: ", error);
-                    commentsContainer.innerHTML = '<div class="comments-error">Error loading comments. Please refresh the page to try again.</div>';
+            } catch (e) {
+                console.error("Critical error in loadComments:", e);
+                commentsContainer.innerHTML = '<div class="comments-error">Firebase error. Check console for details.</div>';
+                
+                // Add a manual comment form fallback
+                const fallbackForm = document.createElement('div');
+                fallbackForm.className = 'fallback-form';
+                fallbackForm.innerHTML = `
+                    <h4>Comments are currently unavailable</h4>
+                    <p>You can still leave feedback using the form below (comments will be visible after approval):</p>
+                    <form id="fallback-comment-form">
+                        <input type="text" class="fallback-name" placeholder="Your Name" required>
+                        <textarea class="fallback-comment" placeholder="Your Comment" required></textarea>
+                        <button type="submit" class="fallback-submit">Submit Feedback</button>
+                    </form>
+                `;
+                commentsContainer.appendChild(fallbackForm);
+                
+                // Add fallback form handler
+                document.getElementById('fallback-comment-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thank you for your feedback! Your comment will be reviewed and posted soon.');
+                    e.target.reset();
                 });
+            }
         }
     }
     
@@ -409,4 +470,141 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.style.overflow = '';
         }, 300); // Remove after fade animation completes
     });
+    
+    // Local storage fallback for comments
+    function setupLocalCommentsFallback() {
+        // Only activate if Firebase failed
+        if (window.firebaseAvailable !== false) return;
+        
+        console.log("Setting up local comments fallback system");
+        
+        const commentsContainer = document.querySelector('.comments-container');
+        const submitCommentBtn = document.querySelector('.submit-comment');
+        const commenterNameInput = document.querySelector('.commenter-name-input');
+        const commentInput = document.querySelector('.comment-input');
+        
+        if (!commentsContainer || !submitCommentBtn || !commenterNameInput || !commentInput) return;
+        
+        // Update the comments tab to show we're in local mode
+        const commentsTab = document.querySelector('[data-tab="comments"]');
+        if (commentsTab) {
+            commentsTab.innerHTML += ' <span class="local-mode">(Local Mode)</span>';
+        }
+        
+        // Load comments from local storage when the comments tab is clicked
+        document.querySelector('[data-tab="comments"]').addEventListener('click', loadLocalComments);
+        
+        // Override the submit button
+        submitCommentBtn.addEventListener('click', function() {
+            const name = commenterNameInput.value.trim();
+            const comment = commentInput.value.trim();
+            
+            if (name && comment) {
+                saveLocalComment(name, comment);
+                commenterNameInput.value = '';
+                commentInput.value = '';
+                loadLocalComments();
+            } else {
+                alert('Please enter both your name and comment!');
+            }
+        });
+        
+        // Initial load if we're on the comments tab
+        if (!document.getElementById('comments-tab').classList.contains('hidden')) {
+            loadLocalComments();
+        }
+    }
+    
+    function saveLocalComment(name, comment) {
+        let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
+        
+        const now = new Date();
+        const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
+        
+        comments.push({
+            name: name,
+            content: comment,
+            date: dateStr,
+            id: 'local-' + Date.now(),
+            isLocal: true
+        });
+        
+        localStorage.setItem('pibbyComments', JSON.stringify(comments));
+    }
+    
+    function loadLocalComments() {
+        const commentsContainer = document.querySelector('.comments-container');
+        if (!commentsContainer) return;
+        
+        let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
+        
+        // Sort newest first
+        comments.sort((a, b) => {
+            const idA = a.id.replace('local-', '');
+            const idB = b.id.replace('local-', '');
+            return parseInt(idB) - parseInt(idA);
+        });
+        
+        if (comments.length === 0) {
+            commentsContainer.innerHTML = `
+                <div class="local-mode-notice">
+                    <p>Comments are currently in local mode due to server issues.</p>
+                    <p>Comments will only be visible on your device.</p>
+                </div>
+                <div class="no-comments">No comments yet! Be the first to leave feedback.</div>
+            `;
+            return;
+        }
+        
+        commentsContainer.innerHTML = `
+            <div class="local-mode-notice">
+                <p>Comments are currently in local mode due to server issues.</p>
+                <p>Comments will only be visible on your device.</p>
+            </div>
+        `;
+        
+        comments.forEach(comment => {
+            const commentEl = document.createElement('div');
+            commentEl.className = 'comment local-comment';
+            
+            commentEl.innerHTML = `
+                <div class="comment-header">
+                    <span class="commenter-name">${escapeHTML(comment.name)}</span>
+                    <span class="comment-date">${comment.date}</span>
+                </div>
+                <div class="comment-content">
+                    ${escapeHTML(comment.content)}
+                </div>
+                <div class="comment-actions">
+                    <button class="delete-local-comment" data-id="${comment.id}">Delete</button>
+                </div>
+            `;
+            
+            commentsContainer.appendChild(commentEl);
+        });
+        
+        // Add delete functionality
+        document.querySelectorAll('.delete-local-comment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
+                comments = comments.filter(comment => comment.id !== id);
+                localStorage.setItem('pibbyComments', JSON.stringify(comments));
+                loadLocalComments();
+            });
+        });
+    }
+    
+    // Function to check Firebase availability and switch to local mode if needed
+    function checkFirebaseAndFallback() {
+        setTimeout(() => {
+            if (window.firebaseAvailable === false) {
+                console.log("Firebase unavailable, switching to local mode");
+                setupLocalCommentsFallback();
+            }
+        }, 3000); // Wait 3 seconds for Firebase to initialize
+    }
+    
+    // Run the check
+    checkFirebaseAndFallback();
 });

@@ -1,5 +1,10 @@
 // Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Declare these variables in the outer scope so they're accessible throughout the script
+    let db = null;
+    let commentsCollection = null;
+    let firebaseAvailable = true; // Flag to track if Firebase is available
+    
     // Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
@@ -10,32 +15,40 @@ document.addEventListener('DOMContentLoaded', function() {
         appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
     };
     
-    // Test Firebase connection
+    // Initialize Firebase with error handling
     try {
         if (typeof firebase === 'undefined') {
             throw new Error("Firebase SDK not loaded");
         }
-
+        
+        // Check if Firebase is already initialized
         if (firebase.apps.length === 0) {
-            firebase.initializeApp({
-                apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
-                authDomain: "pibby-rig-comments.firebaseapp.com",
-                projectId: "pibby-rig-comments", 
-                storageBucket: "pibby-rig-comments.firebasestorage.app",
-                messagingSenderId: "472256862793",
-                appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
-            });
+            firebase.initializeApp(firebaseConfig);
         }
-
-        firebase.firestore().collection('pibbyComments').limit(1).get()
-            .then(snap => {
-                console.log("Connection successful!", snap.size);
+        
+        db = firebase.firestore();
+        commentsCollection = db.collection('pibbyComments');
+        
+        // Test connection - silent check
+        db.collection('pibbyComments').limit(1).get()
+            .then(() => {
+                console.log("Firebase connection successful");
             })
             .catch(error => {
-                console.error("Firebase error:", error);
+                console.error("Firebase connection error:", error);
+                window.firebaseAvailable = false; // Set the global flag
+                const commentsTabs = document.querySelector('[data-tab="comments"]');
+                if (commentsTabs) {
+                    commentsTabs.innerHTML += ' <span class="connection-error">(Offline)</span>';
+                }
+                setupLocalCommentsFallback(); // Set up the fallback immediately
             });
-    } catch(e) {
-        console.error("Firebase init error:", e);
+    } catch (e) {
+        console.error("Firebase initialization failed:", e);
+        // Set fallback mode for comments system
+        window.firebaseAvailable = false;
+        firebaseAvailable = false;
+        setupLocalCommentsFallback(); // Set up the fallback immediately
     }
     
     // Tab Navigation functionality
@@ -57,7 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // If comments tab is selected, load comments
             if(tabToActivate === 'comments') {
-                loadComments();
+                if (firebaseAvailable) {
+                    loadComments();
+                } else {
+                    loadLocalComments();
+                }
             }
         });
     });
@@ -106,7 +123,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (submitCommentBtn && commenterNameInput && commentInput && commentsContainer) {
         // Only load comments if we're on the comments tab initially
         if (!document.getElementById('comments-tab').classList.contains('hidden')) {
-            loadComments();
+            if (firebaseAvailable) {
+                loadComments();
+            } else {
+                loadLocalComments();
+            }
         }
         
         submitCommentBtn.addEventListener('click', function() {
@@ -137,6 +158,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (name && comment) {
                 submitCommentBtn.disabled = true;
                 submitCommentBtn.textContent = 'Submitting...';
+                
+                if (!firebaseAvailable) {
+                    // Use local storage if Firebase is not available
+                    saveLocalComment(name, comment);
+                    commenterNameInput.value = '';
+                    commentInput.value = '';
+                    submitCommentBtn.disabled = false;
+                    submitCommentBtn.textContent = 'Submit Comment';
+                    loadLocalComments();
+                    return;
+                }
                 
                 const now = new Date();
                 const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
@@ -183,6 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function loadComments() {
+        // Safety check - if Firebase is not available, use local comments
+        if (!firebaseAvailable || !db) {
+            loadLocalComments();
+            return;
+        }
+        
         if (commentsContainer) {
             commentsContainer.innerHTML = '<div class="loading-comments">Loading comments...</div>';
             
@@ -248,6 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         retryButton.className = 'retry-button';
                         retryButton.addEventListener('click', () => loadComments());
                         commentsContainer.appendChild(retryButton);
+                        
+                        // Switch to local mode if there's an error fetching comments
+                        firebaseAvailable = false;
+                        setupLocalCommentsFallback();
                     });
             } catch (e) {
                 console.error("Critical error in loadComments:", e);
@@ -273,6 +315,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Thank you for your feedback! Your comment will be reviewed and posted soon.');
                     e.target.reset();
                 });
+                
+                // Switch to local mode
+                firebaseAvailable = false;
+                setupLocalCommentsFallback();
             }
         }
     }
@@ -383,98 +429,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Welcome Popup (without Pibby animation)
-    // Create the popup overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'popup-overlay';
-    
-    // Create the popup container
-    const popup = document.createElement('div');
-    popup.className = 'popup-container';
-    
-    // Create the popup content with rules and original message
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h2>Welcome to Pibby Rig Pack!</h2>
-            <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
-            
-            <div class="rules-container">
-                <h3>Terms of Use:</h3>
-                <ul class="rules-list">
-                    <li>Credit Kxley</li>
-                    <li>Don't claim as your own</li>
-                    <li>No re-releases</li>
-                    <li>No NSFW</li>
-                    <li>No fake leaks</li>
-                </ul>
-            </div>
-            
-            <p>Thank you for reading and have fun with my rigs!</p>
-            
-            <div class="timer-container">
-                <p>Please read the rules carefully.</p>
-                <p>You can continue in: <span id="timer-countdown">30</span> seconds</p>
-                <div class="timer-bar-container">
-                    <div id="timer-bar" class="timer-bar"></div>
-                </div>
-            </div>
-            
-            <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
-        </div>
-    `;
-    
-    // Append popup to overlay and overlay to body
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-    
-    // Disable page interaction while popup is active
-    document.body.style.overflow = 'hidden';
-    
-    // Make popup visible with animation
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-    }, 300);
-    
-    // Timer functionality
-    const timerEl = document.getElementById('timer-countdown');
-    const timerBar = document.getElementById('timer-bar');
-    const okButton = document.getElementById('popup-ok-btn');
-    let timeLeft = 30;
-    
-    // Update timer every second
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = timeLeft;
-        
-        // Update timer bar width
-        const percentLeft = (timeLeft / 30) * 100;
-        timerBar.style.width = `${percentLeft}%`;
-        
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerEl.parentElement.textContent = 'You can continue now!';
-            okButton.disabled = false;
-            okButton.classList.add('active');
-        }
-    }, 1000);
-    
-    // Add click event to the OK button
-    okButton.addEventListener('click', function() {
-        if (okButton.disabled) return;
-        
-        // Fade out popup
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.remove();
-            // Enable page interaction
-            document.body.style.overflow = '';
-        }, 300); // Remove after fade animation completes
-    });
-    
     // Local storage fallback for comments
     function setupLocalCommentsFallback() {
         // Only activate if Firebase failed
-        if (window.firebaseAvailable !== false) return;
+        if (firebaseAvailable !== false) return;
         
         console.log("Setting up local comments fallback system");
         
@@ -493,21 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Load comments from local storage when the comments tab is clicked
         document.querySelector('[data-tab="comments"]').addEventListener('click', loadLocalComments);
-        
-        // Override the submit button
-        submitCommentBtn.addEventListener('click', function() {
-            const name = commenterNameInput.value.trim();
-            const comment = commentInput.value.trim();
-            
-            if (name && comment) {
-                saveLocalComment(name, comment);
-                commenterNameInput.value = '';
-                commentInput.value = '';
-                loadLocalComments();
-            } else {
-                alert('Please enter both your name and comment!');
-            }
-        });
         
         // Initial load if we're on the comments tab
         if (!document.getElementById('comments-tab').classList.contains('hidden')) {
@@ -595,16 +538,91 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Function to check Firebase availability and switch to local mode if needed
-    function checkFirebaseAndFallback() {
-        setTimeout(() => {
-            if (window.firebaseAvailable === false) {
-                console.log("Firebase unavailable, switching to local mode");
-                setupLocalCommentsFallback();
-            }
-        }, 3000); // Wait 3 seconds for Firebase to initialize
-    }
+    // Welcome Popup (without Pibby animation)
+    // Create the popup overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
     
-    // Run the check
-    checkFirebaseAndFallback();
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.className = 'popup-container';
+    
+    // Create the popup content with rules and original message
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h2>Welcome to Pibby Rig Pack!</h2>
+            <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
+            
+            <div class="rules-container">
+                <h3>Terms of Use:</h3>
+                <ul class="rules-list">
+                    <li>Credit Kxley</li>
+                    <li>Don't claim as your own</li>
+                    <li>No re-releases</li>
+                    <li>No NSFW</li>
+                    <li>No fake leaks</li>
+                </ul>
+            </div>
+            
+            <p>Thank you for reading and have fun with my rigs!</p>
+            
+            <div class="timer-container">
+                <p>Please read the rules carefully.</p>
+                <p>You can continue in: <span id="timer-countdown">30</span> seconds</p>
+                <div class="timer-bar-container">
+                    <div id="timer-bar" class="timer-bar"></div>
+                </div>
+            </div>
+            
+            <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
+        </div>
+    `;
+    
+    // Append popup to overlay and overlay to body
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    
+    // Disable page interaction while popup is active
+    document.body.style.overflow = 'hidden';
+    
+    // Make popup visible with animation
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+    }, 300);
+    
+    // Timer functionality
+    const timerEl = document.getElementById('timer-countdown');
+    const timerBar = document.getElementById('timer-bar');
+    const okButton = document.getElementById('popup-ok-btn');
+    let timeLeft = 30;
+    
+    // Update timer every second
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        
+        // Update timer bar width
+        const percentLeft = (timeLeft / 30) * 100;
+        timerBar.style.width = `${percentLeft}%`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerEl.parentElement.textContent = 'You can continue now!';
+            okButton.disabled = false;
+            okButton.classList.add('active');
+        }
+    }, 1000);
+    
+    // Add click event to the OK button
+    okButton.addEventListener('click', function() {
+        if (okButton.disabled) return;
+        
+        // Fade out popup
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+            // Enable page interaction
+            document.body.style.overflow = '';
+        }, 300); // Remove after fade animation completes
+    });
 });

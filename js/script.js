@@ -54,6 +54,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // ========== CREATOR VERIFICATION SYSTEM ==========
+    // List of reserved usernames (case insensitive)
+    const reservedUsernames = [
+        'kxley', 
+        'kxleystudios', 
+        'kxley studios', 
+        'admin', 
+        'administrator', 
+        'mod', 
+        'moderator', 
+        'creator', 
+        'owner'
+    ];
+    
+    // Creator verification secret key
+    const creatorSecretKey = "<Kx839175087mDfS843wj8>";
+    
+    // Function to check if a username is reserved
+    function isReservedUsername(name) {
+        const nameLower = name.toLowerCase().trim();
+        return reservedUsernames.some(reserved => {
+            // Check for exact match or if the reserved name appears in the user input
+            return nameLower === reserved.toLowerCase() || 
+                   nameLower.includes(reserved.toLowerCase());
+        });
+    }
+    
     // Comment submission functionality
     const submitCommentBtn = document.querySelector('.submit-comment');
     const commenterNameInput = document.querySelector('.commenter-name-input');
@@ -67,40 +94,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         submitCommentBtn.addEventListener('click', function() {
-            const name = commenterNameInput.value.trim();
+            let name = commenterNameInput.value.trim();
             const comment = commentInput.value.trim();
+            let isCreator = false;
             
-            if (name && comment) {
-                submitCommentBtn.disabled = true;
-                submitCommentBtn.textContent = 'Submitting...';
-                
-                const now = new Date();
-                const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
-                
-                commentsCollection.add({
-                    name: name,
-                    content: comment,
-                    date: dateStr,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then(() => {
-                    commenterNameInput.value = '';
-                    commentInput.value = '';
-                    
-                    submitCommentBtn.disabled = false;
-                    submitCommentBtn.textContent = 'Submit Comment';
-                    
-                    loadComments();
-                })
-                .catch(error => {
-                    console.error("Error adding comment: ", error);
-                    alert("Sorry, there was an error submitting your comment. Please try again.");
-                    submitCommentBtn.disabled = false;
-                    submitCommentBtn.textContent = 'Submit Comment';
-                });
-            } else {
-                alert('Please enter both your name and comment!');
+            // Check if name is empty
+            if (!name) {
+                alert('Please enter your name!');
+                return;
             }
+            
+            // Check if comment is empty
+            if (!comment) {
+                alert('Please enter a comment!');
+                return;
+            }
+            
+            // Check for creator verification code in the name field
+            if (name.includes(creatorSecretKey)) {
+                // Extract the code and set name to creator name
+                name = name.replace(creatorSecretKey, '').trim();
+                if (!name) name = "KxleyStudios"; // Default if no other text
+                isCreator = true;
+            } 
+            // Check for reserved usernames if not the creator
+            else if (isReservedUsername(name)) {
+                alert('This username is reserved. Please choose a different name.');
+                return;
+            }
+            
+            submitCommentBtn.disabled = true;
+            submitCommentBtn.textContent = 'Submitting...';
+            
+            const now = new Date();
+            const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
+            
+            commentsCollection.add({
+                name: name,
+                content: comment,
+                date: dateStr,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                isCreator: isCreator // Store creator flag in database
+            })
+            .then(() => {
+                commenterNameInput.value = '';
+                commentInput.value = '';
+                
+                submitCommentBtn.disabled = false;
+                submitCommentBtn.textContent = 'Submit Comment';
+                
+                loadComments();
+            })
+            .catch(error => {
+                console.error("Error adding comment: ", error);
+                alert("Sorry, there was an error submitting your comment. Please try again.");
+                submitCommentBtn.disabled = false;
+                submitCommentBtn.textContent = 'Submit Comment';
+            });
         });
     }
     
@@ -122,7 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         const commentEl = createCommentElement(
                             commentData.name,
                             commentData.date,
-                            commentData.content
+                            commentData.content,
+                            commentData.isCreator || false
                         );
                         commentsContainer.appendChild(commentEl);
                     });
@@ -134,12 +185,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function createCommentElement(name, date, content) {
+    function createCommentElement(name, date, content, isCreator) {
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
+        
+        // Apply special styling for creator comments
+        if (isCreator) {
+            commentEl.classList.add('creator-comment');
+        }
+        
+        // Create the comment HTML structure
+        let nameDisplay = escapeHTML(name);
+        
+        // Add creator badge if this is the creator
+        if (isCreator) {
+            nameDisplay = `<span class="creator-name">${nameDisplay}</span> <span class="creator-badge">Creator</span>`;
+        }
+        
         commentEl.innerHTML = `
             <div class="comment-header">
-                <span class="commenter-name">${escapeHTML(name)}</span>
+                <span class="commenter-name">${nameDisplay}</span>
                 <span class="comment-date">${date}</span>
             </div>
             <div class="comment-content">

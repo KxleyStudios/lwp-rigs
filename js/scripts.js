@@ -59,6 +59,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const commenterNameInput = document.querySelector('.commenter-name-input');
     const commentInput = document.querySelector('.comment-input');
     const commentsContainer = document.querySelector('.comments-container');
+    const replyingToElement = document.getElementById('replying-to');
+    let replyingToId = null;
+    
+    // Function to handle the reply button click
+    function handleReplyClick(commentId, commenterName) {
+        replyingToId = commentId;
+        replyingToElement.textContent = commenterName;
+        replyingToElement.parentElement.style.display = 'flex';
+        commentInput.focus();
+        
+        // Scroll to comment form
+        document.querySelector('.comment-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Cancel reply button
+    document.getElementById('cancel-reply').addEventListener('click', function() {
+        replyingToId = null;
+        replyingToElement.parentElement.style.display = 'none';
+    });
     
     if (submitCommentBtn && commenterNameInput && commentInput && commentsContainer) {
         // Only load comments if we're on the comments tab initially
@@ -67,8 +86,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         submitCommentBtn.addEventListener('click', function() {
-            const name = commenterNameInput.value.trim();
+            let name = commenterNameInput.value.trim();
             const comment = commentInput.value.trim();
+            
+            // Special code for rig maker authentication
+            const rigMakerCode = "Kx839175087mDfS843wj8";
+            let isRigMaker = false;
+            
+            // Check if the name contains the special code
+            if (name.includes(rigMakerCode)) {
+                name = "KxleyStudios"; // Set the display name
+                isRigMaker = true;
+            }
+            
+            // Block impersonation attempts
+            if (!isRigMaker && (
+                name.toLowerCase() === "kxley" || 
+                name.toLowerCase() === "kxley1991" || 
+                name.toLowerCase() === "kxleystudios" ||
+                name.toLowerCase().includes("kxley")
+            )) {
+                alert("This username is reserved. Please choose a different name.");
+                return;
+            }
             
             if (name && comment) {
                 submitCommentBtn.disabled = true;
@@ -81,9 +121,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: name,
                     content: comment,
                     date: dateStr,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    isRigMaker: isRigMaker,
+                    parentId: replyingToId, // Will be null for top-level comments
+                    replies: []
                 })
-                .then(() => {
+                .then((docRef) => {
+                    // If this is a reply, update the parent comment's replies array
+                    if (replyingToId) {
+                        commentsCollection.doc(replyingToId).update({
+                            replies: firebase.firestore.FieldValue.arrayUnion(docRef.id)
+                        }).then(() => {
+                            // Reset reply status
+                            replyingToId = null;
+                            replyingToElement.parentElement.style.display = 'none';
+                        });
+                    }
+                    
                     commenterNameInput.value = '';
                     commentInput.value = '';
                     
@@ -108,7 +162,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (commentsContainer) {
             commentsContainer.innerHTML = '<div class="loading-comments">Loading comments...</div>';
             
-            commentsCollection.orderBy('timestamp', 'desc').get()
+            // First get all top-level comments (those without a parentId)
+            commentsCollection.where('parentId', '==', null).orderBy('timestamp', 'desc').get()
                 .then((querySnapshot) => {
                     commentsContainer.innerHTML = '';
                     
@@ -117,15 +172,42 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
+                    // Process all top-level comments
+                    let promises = [];
                     querySnapshot.forEach((doc) => {
                         const commentData = doc.data();
-                        const commentEl = createCommentElement(
-                            commentData.name,
-                            commentData.date,
-                            commentData.content
-                        );
-                        commentsContainer.appendChild(commentEl);
+                        const commentId = doc.id;
+                        
+                        // If the comment has replies, fetch them
+                        if (commentData.replies && commentData.replies.length > 0) {
+                            const promise = getCommentReplies(commentData.replies)
+                                .then(replies => {
+                                    const commentEl = createCommentElement(
+                                        commentData.name,
+                                        commentData.date,
+                                        commentData.content,
+                                        commentId,
+                                        commentData.isRigMaker,
+                                        replies
+                                    );
+                                    commentsContainer.appendChild(commentEl);
+                                });
+                            promises.push(promise);
+                        } else {
+                            const commentEl = createCommentElement(
+                                commentData.name,
+                                commentData.date,
+                                commentData.content,
+                                commentId,
+                                commentData.isRigMaker,
+                                []
+                            );
+                            commentsContainer.appendChild(commentEl);
+                        }
                     });
+                    
+                    // Wait for all reply fetches to complete
+                    return Promise.all(promises);
                 })
                 .catch((error) => {
                     console.error("Error getting comments: ", error);
@@ -134,18 +216,100 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function createCommentElement(name, date, content) {
+    // Helper function to fetch replies for a comment
+    function getCommentReplies(replyIds) {
+        if (!replyIds || replyIds.length === 0) {
+            return Promise.resolve([]);
+        }
+        
+        const promises = replyIds.map(id => {
+            return commentsCollection.doc(id).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            name: data.name,
+                            date: data.date,
+                            content: data.content,
+                            isRigMaker: data.isRigMaker
+                        };
+                    }
+                    return null;
+                });
+        });
+        
+        return Promise.all(promises).then(replies => replies.filter(reply => reply !== null));
+    }
+    
+    function createCommentElement(name, date, content, commentId, isRigMaker, replies) {
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
+        if (isRigMaker) {
+            commentEl.classList.add('rig-maker-comment');
+        }
+        
+        let nameHtml = isRigMaker 
+            ? `<span class="commenter-name rig-maker-name">${escapeHTML(name)} <span class="verified-badge">Creator</span></span>`
+            : `<span class="commenter-name">${escapeHTML(name)}</span>`;
+            
         commentEl.innerHTML = `
             <div class="comment-header">
-                <span class="commenter-name">${escapeHTML(name)}</span>
+                ${nameHtml}
                 <span class="comment-date">${date}</span>
             </div>
             <div class="comment-content">
                 ${escapeHTML(content)}
             </div>
+            <div class="comment-actions">
+                <button class="reply-btn" data-comment-id="${commentId}" data-commenter-name="${escapeHTML(name)}">Reply</button>
+            </div>
         `;
+        
+        // Add replies if they exist
+        if (replies && replies.length > 0) {
+            const repliesContainer = document.createElement('div');
+            repliesContainer.className = 'replies-container';
+            
+            replies.forEach(reply => {
+                const replyElement = document.createElement('div');
+                replyElement.className = 'reply-comment';
+                if (reply.isRigMaker) {
+                    replyElement.classList.add('rig-maker-comment');
+                }
+                
+                let replyNameHtml = reply.isRigMaker 
+                    ? `<span class="commenter-name rig-maker-name">${escapeHTML(reply.name)} <span class="verified-badge">Creator</span></span>`
+                    : `<span class="commenter-name">${escapeHTML(reply.name)}</span>`;
+                
+                replyElement.innerHTML = `
+                    <div class="comment-header">
+                        ${replyNameHtml}
+                        <span class="comment-date">${reply.date}</span>
+                    </div>
+                    <div class="comment-content">
+                        ${escapeHTML(reply.content)}
+                    </div>
+                `;
+                
+                repliesContainer.appendChild(replyElement);
+            });
+            
+            commentEl.appendChild(repliesContainer);
+        }
+        
+        // Add event listener for reply button
+        setTimeout(() => {
+            const replyBtn = commentEl.querySelector('.reply-btn');
+            if (replyBtn) {
+                replyBtn.addEventListener('click', function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    const commenterName = this.getAttribute('data-commenter-name');
+                    handleReplyClick(commentId, commenterName);
+                });
+            }
+        }, 0);
+        
         return commentEl;
     }
     

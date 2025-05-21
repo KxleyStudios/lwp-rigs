@@ -372,6 +372,121 @@ footer {
     line-height: 1.4;
 }
 
+/* Rig Maker Comment Styling */
+.rig-maker-comment {
+    border-left: 4px solid #FF5722;
+    background-color: rgba(255, 245, 240, 0.7);
+}
+
+.rig-maker-name {
+    color: #FF5722 !important;
+    font-size: 1.1rem;
+}
+
+.verified-badge {
+    background-color: #FF5722;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Comment Reply Styling */
+.reply-btn {
+    background-color: transparent;
+    border: none;
+    color: #4285F4;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 3px 8px;
+    margin-top: 5px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.reply-btn:hover {
+    background-color: rgba(66, 133, 244, 0.1);
+    text-decoration: underline;
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+/* Replies Container */
+.replies-container {
+    margin-top: 15px;
+    margin-left: 20px;
+    padding-left: 10px;
+    border-left: 2px solid #e0e0e0;
+}
+
+.reply-comment {
+    background-color: rgba(248, 248, 248, 0.7);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Reply Status */
+.replying-status {
+    display: none;
+    align-items: center;
+    background-color: #f0f7ff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+#replying-to {
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+#cancel-reply {
+    color: #d32f2f;
+    background: none;
+    border: none;
+    padding: 3px 6px;
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+#cancel-reply:hover {
+    background-color: rgba(211, 47, 47, 0.1);
+    text-decoration: underline;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .replies-container {
+        margin-left: 10px;
+        padding-left: 5px;
+    }
+    
+    .reply-btn {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+    }
+    
+    .verified-badge {
+        font-size: 0.6rem;
+        padding: 1px 4px;
+    }
+}
+
 /* Comment Form */
 .comment-form {
     background-color: #f9f9f9;

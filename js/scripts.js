@@ -1,11 +1,6 @@
 // Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Declare these variables in the outer scope so they're accessible throughout the script
-    let db = null;
-    let commentsCollection = null;
-    let firebaseAvailable = true; // Flag to track if Firebase is available
-    
-    // Firebase configuration
+    // Previous Firebase initialization code
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
         authDomain: "pibby-rig-comments.firebaseapp.com",
@@ -15,41 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
         appId: "1:472256862793:web:6ef3079097475f3fbcfd98"
     };
     
-    // Initialize Firebase with error handling
-    try {
-        if (typeof firebase === 'undefined') {
-            throw new Error("Firebase SDK not loaded");
-        }
-        
-        // Check if Firebase is already initialized
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        db = firebase.firestore();
-        commentsCollection = db.collection('pibbyComments');
-        
-        // Test connection - silent check
-        db.collection('pibbyComments').limit(1).get()
-            .then(() => {
-                console.log("Firebase connection successful");
-            })
-            .catch(error => {
-                console.error("Firebase connection error:", error);
-                window.firebaseAvailable = false; // Set the global flag
-                const commentsTabs = document.querySelector('[data-tab="comments"]');
-                if (commentsTabs) {
-                    commentsTabs.innerHTML += ' <span class="connection-error">(Offline)</span>';
-                }
-                setupLocalCommentsFallback(); // Set up the fallback immediately
-            });
-    } catch (e) {
-        console.error("Firebase initialization failed:", e);
-        // Set fallback mode for comments system
-        window.firebaseAvailable = false;
-        firebaseAvailable = false;
-        setupLocalCommentsFallback(); // Set up the fallback immediately
-    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const commentsCollection = db.collection('pibbyComments');
     
     // Tab Navigation functionality
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -70,11 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // If comments tab is selected, load comments
             if(tabToActivate === 'comments') {
-                if (firebaseAvailable) {
-                    loadComments();
-                } else {
-                    loadLocalComments();
-                }
+                loadComments();
             }
         });
     });
@@ -100,75 +59,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const commenterNameInput = document.querySelector('.commenter-name-input');
     const commentInput = document.querySelector('.comment-input');
     const commentsContainer = document.querySelector('.comments-container');
-    const replyingToElement = document.getElementById('replying-to');
-    let replyingToId = null;
-    
-    // Function to handle the reply button click
-    function handleReplyClick(commentId, commenterName) {
-        replyingToId = commentId;
-        replyingToElement.textContent = commenterName;
-        replyingToElement.parentElement.style.display = 'flex';
-        commentInput.focus();
-        
-        // Scroll to comment form
-        document.querySelector('.comment-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    
-    // Cancel reply button
-    document.getElementById('cancel-reply').addEventListener('click', function() {
-        replyingToId = null;
-        replyingToElement.parentElement.style.display = 'none';
-    });
     
     if (submitCommentBtn && commenterNameInput && commentInput && commentsContainer) {
         // Only load comments if we're on the comments tab initially
         if (!document.getElementById('comments-tab').classList.contains('hidden')) {
-            if (firebaseAvailable) {
-                loadComments();
-            } else {
-                loadLocalComments();
-            }
+            loadComments();
         }
         
         submitCommentBtn.addEventListener('click', function() {
-            let name = commenterNameInput.value.trim();
+            const name = commenterNameInput.value.trim();
             const comment = commentInput.value.trim();
-            
-            // Special code for rig maker authentication
-            const rigMakerCode = "Kx839175087mDfS843wj8";
-            let isRigMaker = false;
-            
-            // Check if the name contains the special code
-            if (name.includes(rigMakerCode)) {
-                name = "KxleyStudios"; // Set the display name
-                isRigMaker = true;
-            }
-            
-            // Block impersonation attempts
-            if (!isRigMaker && (
-                name.toLowerCase() === "kxley" || 
-                name.toLowerCase() === "kxley1991" || 
-                name.toLowerCase() === "kxleystudios" ||
-                name.toLowerCase().includes("kxley")
-            )) {
-                alert("This username is reserved. Please choose a different name.");
-                return;
-            }
             
             if (name && comment) {
                 submitCommentBtn.disabled = true;
                 submitCommentBtn.textContent = 'Submitting...';
-                
-                if (!firebaseAvailable) {
-                    // Use local storage if Firebase is not available
-                    saveLocalComment(name, comment);
-                    commenterNameInput.value = '';
-                    commentInput.value = '';
-                    submitCommentBtn.disabled = false;
-                    submitCommentBtn.textContent = 'Submit Comment';
-                    loadLocalComments();
-                    return;
-                }
                 
                 const now = new Date();
                 const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
@@ -177,23 +81,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: name,
                     content: comment,
                     date: dateStr,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    isRigMaker: isRigMaker,
-                    parentId: replyingToId, // Will be null for top-level comments
-                    replies: []
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 })
-                .then((docRef) => {
-                    // If this is a reply, update the parent comment's replies array
-                    if (replyingToId) {
-                        commentsCollection.doc(replyingToId).update({
-                            replies: firebase.firestore.FieldValue.arrayUnion(docRef.id)
-                        }).then(() => {
-                            // Reset reply status
-                            replyingToId = null;
-                            replyingToElement.parentElement.style.display = 'none';
-                        });
-                    }
-                    
+                .then(() => {
                     commenterNameInput.value = '';
                     commentInput.value = '';
                     
@@ -215,208 +105,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function loadComments() {
-        // Safety check - if Firebase is not available, use local comments
-        if (!firebaseAvailable || !db) {
-            loadLocalComments();
-            return;
-        }
-        
         if (commentsContainer) {
             commentsContainer.innerHTML = '<div class="loading-comments">Loading comments...</div>';
             
-            // Debug: Log to verify Firebase is initialized
-            console.log("Firebase initialized:", firebase.app().name);
-            console.log("Firestore reference:", db);
-            
-            try {
-                // First get all top-level comments (those without a parentId)
-                commentsCollection.where('parentId', '==', null).orderBy('timestamp', 'desc').get()
-                    .then((querySnapshot) => {
-                        commentsContainer.innerHTML = '';
-                        
-                        if (querySnapshot.empty) {
-                            commentsContainer.innerHTML = '<div class="no-comments">No comments yet! Be the first to leave feedback.</div>';
-                            return;
-                        }
-                        
-                        // Process all top-level comments
-                        let promises = [];
-                        querySnapshot.forEach((doc) => {
-                            const commentData = doc.data();
-                            const commentId = doc.id;
-                            
-                            // If the comment has replies, fetch them
-                            if (commentData.replies && commentData.replies.length > 0) {
-                                const promise = getCommentReplies(commentData.replies)
-                                    .then(replies => {
-                                        const commentEl = createCommentElement(
-                                            commentData.name,
-                                            commentData.date,
-                                            commentData.content,
-                                            commentId,
-                                            commentData.isRigMaker,
-                                            replies
-                                        );
-                                        commentsContainer.appendChild(commentEl);
-                                    });
-                                promises.push(promise);
-                            } else {
-                                const commentEl = createCommentElement(
-                                    commentData.name,
-                                    commentData.date,
-                                    commentData.content,
-                                    commentId,
-                                    commentData.isRigMaker,
-                                    []
-                                );
-                                commentsContainer.appendChild(commentEl);
-                            }
-                        });
-                        
-                        // Wait for all reply fetches to complete
-                        return Promise.all(promises);
-                    })
-                    .catch((error) => {
-                        console.error("Error getting comments: ", error);
-                        commentsContainer.innerHTML = '<div class="comments-error">Error loading comments. Please refresh the page to try again.</div>';
-                        
-                        // Add a retry button
-                        const retryButton = document.createElement('button');
-                        retryButton.textContent = 'Retry Loading Comments';
-                        retryButton.className = 'retry-button';
-                        retryButton.addEventListener('click', () => loadComments());
-                        commentsContainer.appendChild(retryButton);
-                        
-                        // Switch to local mode if there's an error fetching comments
-                        firebaseAvailable = false;
-                        setupLocalCommentsFallback();
-                    });
-            } catch (e) {
-                console.error("Critical error in loadComments:", e);
-                commentsContainer.innerHTML = '<div class="comments-error">Firebase error. Check console for details.</div>';
-                
-                // Add a manual comment form fallback
-                const fallbackForm = document.createElement('div');
-                fallbackForm.className = 'fallback-form';
-                fallbackForm.innerHTML = `
-                    <h4>Comments are currently unavailable</h4>
-                    <p>You can still leave feedback using the form below (comments will be visible after approval):</p>
-                    <form id="fallback-comment-form">
-                        <input type="text" class="fallback-name" placeholder="Your Name" required>
-                        <textarea class="fallback-comment" placeholder="Your Comment" required></textarea>
-                        <button type="submit" class="fallback-submit">Submit Feedback</button>
-                    </form>
-                `;
-                commentsContainer.appendChild(fallbackForm);
-                
-                // Add fallback form handler
-                document.getElementById('fallback-comment-form').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Thank you for your feedback! Your comment will be reviewed and posted soon.');
-                    e.target.reset();
-                });
-                
-                // Switch to local mode
-                firebaseAvailable = false;
-                setupLocalCommentsFallback();
-            }
-        }
-    }
-    
-    // Helper function to fetch replies for a comment
-    function getCommentReplies(replyIds) {
-        if (!replyIds || replyIds.length === 0) {
-            return Promise.resolve([]);
-        }
-        
-        const promises = replyIds.map(id => {
-            return commentsCollection.doc(id).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        return {
-                            id: doc.id,
-                            name: data.name,
-                            date: data.date,
-                            content: data.content,
-                            isRigMaker: data.isRigMaker
-                        };
+            commentsCollection.orderBy('timestamp', 'desc').get()
+                .then((querySnapshot) => {
+                    commentsContainer.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        commentsContainer.innerHTML = '<div class="no-comments">No comments yet! Be the first to leave feedback.</div>';
+                        return;
                     }
-                    return null;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const commentData = doc.data();
+                        const commentEl = createCommentElement(
+                            commentData.name,
+                            commentData.date,
+                            commentData.content
+                        );
+                        commentsContainer.appendChild(commentEl);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error getting comments: ", error);
+                    commentsContainer.innerHTML = '<div class="comments-error">Error loading comments. Please refresh the page to try again.</div>';
                 });
-        });
-        
-        return Promise.all(promises).then(replies => replies.filter(reply => reply !== null));
+        }
     }
     
-    function createCommentElement(name, date, content, commentId, isRigMaker, replies) {
+    function createCommentElement(name, date, content) {
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
-        if (isRigMaker) {
-            commentEl.classList.add('rig-maker-comment');
-        }
-        
-        let nameHtml = isRigMaker 
-            ? `<span class="commenter-name rig-maker-name">${escapeHTML(name)} <span class="verified-badge">Creator</span></span>`
-            : `<span class="commenter-name">${escapeHTML(name)}</span>`;
-            
         commentEl.innerHTML = `
             <div class="comment-header">
-                ${nameHtml}
+                <span class="commenter-name">${escapeHTML(name)}</span>
                 <span class="comment-date">${date}</span>
             </div>
             <div class="comment-content">
                 ${escapeHTML(content)}
             </div>
-            <div class="comment-actions">
-                <button class="reply-btn" data-comment-id="${commentId}" data-commenter-name="${escapeHTML(name)}">Reply</button>
-            </div>
         `;
-        
-        // Add replies if they exist
-        if (replies && replies.length > 0) {
-            const repliesContainer = document.createElement('div');
-            repliesContainer.className = 'replies-container';
-            
-            replies.forEach(reply => {
-                const replyElement = document.createElement('div');
-                replyElement.className = 'reply-comment';
-                if (reply.isRigMaker) {
-                    replyElement.classList.add('rig-maker-comment');
-                }
-                
-                let replyNameHtml = reply.isRigMaker 
-                    ? `<span class="commenter-name rig-maker-name">${escapeHTML(reply.name)} <span class="verified-badge">Creator</span></span>`
-                    : `<span class="commenter-name">${escapeHTML(reply.name)}</span>`;
-                
-                replyElement.innerHTML = `
-                    <div class="comment-header">
-                        ${replyNameHtml}
-                        <span class="comment-date">${reply.date}</span>
-                    </div>
-                    <div class="comment-content">
-                        ${escapeHTML(reply.content)}
-                    </div>
-                `;
-                
-                repliesContainer.appendChild(replyElement);
-            });
-            
-            commentEl.appendChild(repliesContainer);
-        }
-        
-        // Add event listener for reply button
-        setTimeout(() => {
-            const replyBtn = commentEl.querySelector('.reply-btn');
-            if (replyBtn) {
-                replyBtn.addEventListener('click', function() {
-                    const commentId = this.getAttribute('data-comment-id');
-                    const commenterName = this.getAttribute('data-commenter-name');
-                    handleReplyClick(commentId, commenterName);
-                });
-            }
-        }, 0);
-        
         return commentEl;
     }
     
@@ -427,115 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
-    }
-    
-    // Local storage fallback for comments
-    function setupLocalCommentsFallback() {
-        // Only activate if Firebase failed
-        if (firebaseAvailable !== false) return;
-        
-        console.log("Setting up local comments fallback system");
-        
-        const commentsContainer = document.querySelector('.comments-container');
-        const submitCommentBtn = document.querySelector('.submit-comment');
-        const commenterNameInput = document.querySelector('.commenter-name-input');
-        const commentInput = document.querySelector('.comment-input');
-        
-        if (!commentsContainer || !submitCommentBtn || !commenterNameInput || !commentInput) return;
-        
-        // Update the comments tab to show we're in local mode
-        const commentsTab = document.querySelector('[data-tab="comments"]');
-        if (commentsTab) {
-            commentsTab.innerHTML += ' <span class="local-mode">(Local Mode)</span>';
-        }
-        
-        // Load comments from local storage when the comments tab is clicked
-        document.querySelector('[data-tab="comments"]').addEventListener('click', loadLocalComments);
-        
-        // Initial load if we're on the comments tab
-        if (!document.getElementById('comments-tab').classList.contains('hidden')) {
-            loadLocalComments();
-        }
-    }
-    
-    function saveLocalComment(name, comment) {
-        let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
-        
-        const now = new Date();
-        const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
-        
-        comments.push({
-            name: name,
-            content: comment,
-            date: dateStr,
-            id: 'local-' + Date.now(),
-            isLocal: true
-        });
-        
-        localStorage.setItem('pibbyComments', JSON.stringify(comments));
-    }
-    
-    function loadLocalComments() {
-        const commentsContainer = document.querySelector('.comments-container');
-        if (!commentsContainer) return;
-        
-        let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
-        
-        // Sort newest first
-        comments.sort((a, b) => {
-            const idA = a.id.replace('local-', '');
-            const idB = b.id.replace('local-', '');
-            return parseInt(idB) - parseInt(idA);
-        });
-        
-        if (comments.length === 0) {
-            commentsContainer.innerHTML = `
-                <div class="local-mode-notice">
-                    <p>Comments are currently in local mode due to server issues.</p>
-                    <p>Comments will only be visible on your device.</p>
-                </div>
-                <div class="no-comments">No comments yet! Be the first to leave feedback.</div>
-            `;
-            return;
-        }
-        
-        commentsContainer.innerHTML = `
-            <div class="local-mode-notice">
-                <p>Comments are currently in local mode due to server issues.</p>
-                <p>Comments will only be visible on your device.</p>
-            </div>
-        `;
-        
-        comments.forEach(comment => {
-            const commentEl = document.createElement('div');
-            commentEl.className = 'comment local-comment';
-            
-            commentEl.innerHTML = `
-                <div class="comment-header">
-                    <span class="commenter-name">${escapeHTML(comment.name)}</span>
-                    <span class="comment-date">${comment.date}</span>
-                </div>
-                <div class="comment-content">
-                    ${escapeHTML(comment.content)}
-                </div>
-                <div class="comment-actions">
-                    <button class="delete-local-comment" data-id="${comment.id}">Delete</button>
-                </div>
-            `;
-            
-            commentsContainer.appendChild(commentEl);
-        });
-        
-        // Add delete functionality
-        document.querySelectorAll('.delete-local-comment').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                let comments = JSON.parse(localStorage.getItem('pibbyComments') || '[]');
-                comments = comments.filter(comment => comment.id !== id);
-                localStorage.setItem('pibbyComments', JSON.stringify(comments));
-                loadLocalComments();
-            });
-        });
     }
     
     // Welcome Popup (without Pibby animation)

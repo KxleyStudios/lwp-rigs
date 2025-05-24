@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="rules-container">
                 <h3>Terms of Use:</h3>
                 <ul class="rules-list">
-                    <li>Credit Kxley</li>
+                    <li>Credit Kxley (NOT A SUGGESTION BUT A REQUIREMENT)</li>
                     <li>Don't claim as your own</li>
                     <li>No re-releases</li>
                     <li>No NSFW</li>

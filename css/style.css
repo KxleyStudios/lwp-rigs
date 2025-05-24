@@ -40,6 +40,19 @@ body {
     margin-bottom: 30px;
 }
 
+.main-logo {
+    max-width: 600px;
+    width: 90%;
+    height: auto;
+    margin-bottom: 10px;
+    filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.2));
+    transition: transform 0.3s ease;
+}
+
+.main-logo:hover {
+    transform: scale(1.05);
+}
+
 .title {
     font-size: 3.5rem;
     font-weight: bold;
@@ -851,10 +864,6 @@ footer {
     margin-top: 0;
     margin-bottom: 10px;
     border-bottom: none;
-}
-
-.tutorial-tips ul {
-    margin-bottom: 0;
 }
 
 /* Responsive Styles for Tutorial Tab */

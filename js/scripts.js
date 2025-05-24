@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const commentsCollection = db.collection('pibbyComments');
+    const forumsCollection = db.collection('pibbyForums');
+    
+    // Owner authentication state
+    let isOwnerAuthenticated = false;
     
     // Tab Navigation functionality
     const tabButtons = document.querySelectorAll('.tab-button');

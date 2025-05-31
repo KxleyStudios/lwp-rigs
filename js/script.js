@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const commentsCollection = db.collection('pibbyComments');
+    const forumsCollection = db.collection('pibbyForums');
+    
+    // Owner authentication state
+    let isOwnerAuthenticated = false;
     
     // Tab Navigation functionality
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -39,20 +43,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Changelog toggle functionality
-    const changelogToggle = document.querySelector('.changelog-toggle');
-    const changelogContent = document.querySelector('.changelog-content');
+    const changelogToggles = document.querySelectorAll('.changelog-toggle');
+    const changelogContents = document.querySelectorAll('.changelog-content');
     
-    if (changelogToggle && changelogContent) {
-        changelogToggle.addEventListener('click', function() {
-            if (changelogContent.style.display === 'block') {
-                changelogContent.style.display = 'none';
-                changelogToggle.textContent = 'Show Changelog';
-            } else {
-                changelogContent.style.display = 'block';
-                changelogToggle.textContent = 'Hide Changelog';
-            }
-        });
-    }
+    changelogToggles.forEach((toggle, index) => {
+        const content = changelogContents[index];
+        if (toggle && content) {
+            toggle.addEventListener('click', function() {
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                    toggle.textContent = 'Show Changelog';
+                } else {
+                    content.style.display = 'block';
+                    toggle.textContent = 'Hide Changelog';
+                }
+            });
+        }
+    });
     
     // ========== CREATOR VERIFICATION SYSTEM ==========
     // List of reserved usernames (case insensitive)

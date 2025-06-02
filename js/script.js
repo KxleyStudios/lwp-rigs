@@ -1,4 +1,4 @@
-// Tab Navigation Functionality
+3060// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Previous Firebase initialization code
     const firebaseConfig = {
@@ -255,7 +255,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <li><strong>No Fake Leaks or Manipulation:</strong> You may not fake leaks, create false versions, or mislead others using this content in any way. All impersonation, forgery, or attempts to confuse users will be met with severe action.</li>
                     <li><strong>No Disrespect Towards Kxley:</strong> You are expected to treat <strong>Kxley</strong> with full respect. Harassment, hate, slander, or defamation against the creator will result in being blacklisted from all future content and reported if necessary.</li>
                     <li><strong>No Monetization:</strong> You may not use this content in any commercial capacity, including paywalled content, NFTs, or any monetized service, without explicit written permission from <strong>Kxley</strong>.</li>
-                    <li><strong>No Edits Without Permission:</strong> Modifying, altering, or editing this content is prohibited unless you have direct permission from <strong>Kxley</strong>. This includes altering names, textures, assets, or features.</li>
                     <li><strong>Legal Enforcement:</strong> Violation of any of the above terms may result in legal action, DMCA takedowns, blacklisting, or community bans. These rules are binding and enforced.</li>
                     <li><strong>Subject to Change:</strong> These Terms of Use may be updated at any time by <strong>Kxley</strong>. Continued use of the content implies agreement to the most recent version.</li>
                 </ul>
@@ -265,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             <div class="timer-container">
                 <p>Please read the rules carefully.</p>
-                <p>You can continue in: <span id="timer-countdown">30</span> seconds</p>
+                <p>You can continue in: <span id="timer-countdown">120</span> seconds</p>
                 <div class="timer-bar-container">
                     <div id="timer-bar" class="timer-bar"></div>
                 </div>
@@ -291,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerEl = document.getElementById('timer-countdown');
     const timerBar = document.getElementById('timer-bar');
     const okButton = document.getElementById('popup-ok-btn');
-    let timeLeft = 30;
+    let timeLeft = 120;
     
     // Update timer every second
     const timerInterval = setInterval(() => {
@@ -299,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timerEl.textContent = timeLeft;
         
         // Update timer bar width
-        const percentLeft = (timeLeft / 30) * 100;
+        const percentLeft = (timeLeft / 120) * 100;
         timerBar.style.width = `${percentLeft}%`;
         
         if (timeLeft <= 0) {

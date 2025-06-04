@@ -45,78 +45,134 @@
 <body>
     <div class="main-content">
         <div class="header">
-            <h1 class="title">Learning with Pibby</h1>
-            <h2 class="sub-title">RIG PACK</h2>
+            <img src="images/pibby-logo.png" alt="Learning with Pibby" class="main-logo">
         </div>
         
-        <div class="container">
-        <!-- Pibby Rig Box -->
-        <div class="rig-box">
-            <div class="character">
-                <img src="images/pibby.png" alt="Pibby Character">
-            </div>
-            <div class="rig-name">
-                <img src="images/pibby-icon.png" alt="Pibby Icon" class="rig-icon">
-                <span>Pibby Rig</span>
-                <span class="version-badge">v0.7</span>
-            </div>
-            <div class="download-buttons">
-                <a href="https://drive.google.com/drive/folders/1KmAblnuWKRtile_6KGr1a42L5HRGpaR3?usp=sharing" class="download-btn drive">Google Drive</a>
-                <a href="https://www.mediafire.com/file/8zg8c9wlwiljnku/Pibby+Rig.zip/file" class="download-btn mediafire">MediaFire</a>
-            </div>
-            
-            <!-- Changelog Section for Pibby Rig -->
-            <div class="changelog-container">
-                <button class="changelog-toggle">Show Changelog</button>
-                <div class="changelog-content">
-                    <div class="changelog-item">
-                        <div class="changelog-version">v0.7 - May 6, 2025</div>
-                        <ul>
-                            <li>Added Bandage</li>
-                            <li>Added More Mouths</li>
-                            <li>Better Line Smoothing</li>
-                        </ul>
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-button active" data-tab="rigs">Rigs</button>
+            <button class="tab-button" data-tab="tutorial">Tutorial</button>
+            <button class="tab-button" data-tab="comments">Comments</button>
+        </div>
+        
+        <!-- Rigs Tab -->
+        <div class="tab-content" id="rigs-tab">
+            <div class="container">
+                <!-- Pibby Rig Box -->
+                <div class="rig-box">
+                    <div class="character">
+                        <img src="images/pibby.png" alt="Pibby Character">
+                    </div>
+                    <div class="rig-name">
+                        <img src="images/pibby-icon.png" alt="Pibby Icon" class="rig-icon">
+                        <span>Pibby Rig</span>
+                        <span class="version-badge">v1</span>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://drive.google.com/drive/folders/1KmAblnuWKRtile_6KGr1a42L5HRGpaR3?usp=sharing" class="download-btn drive">Google Drive</a>
+                    </div>
+                    
+                    <!-- Changelog Section for Pibby Rig -->
+                    <div class="changelog-container">
+                        <button class="changelog-toggle">Show Changelog</button>
+                        <div class="changelog-content">
+                            <div class="changelog-item">
+                                <div class="changelog-version">v1 - May 19, 2025</div>
+                                <ul>
+                                    <li>Added more faces</li>
+                                    <li>Head Rotation</li>
+                                    <li>ToonSquid Port</li>
+                                    <li>Flip-A-Clip Port</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bun Bun Rig Box -->
+                <div class="rig-box">
+                    <div class="character">
+                        <img src="images/bunbun.png" alt="Bun Bun Character">
+                    </div>
+                    <div class="rig-name">
+                        <img src="images/bunbun-icon.png" alt="Bun Bun Icon" class="rig-icon">
+                        <span>BunBun Rig</span>
+                        <span class="version-badge">v0.5</span>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://drive.google.com/drive/folders/150v9Fg6FOsLHILCKFOxDBrG2L9Aac7xh?usp=sharing" class="download-btn drive">Google Drive</a>
+                    </div>
+                    
+                    <!-- Changelog Section for BunBun Rig -->
+                    <div class="changelog-container">
+                        <button class="changelog-toggle">Show Changelog</button>
+                        <div class="changelog-content">
+                            <div class="changelog-item">
+                                <div class="changelog-version">v0.5 - May 30, 2025</div>
+                                <ul>
+                                    <li>Initial Release</li>
+                                    <li>Base Expressions</li>
+                                    <li>Ear Movement Positions</li>
+                                    <li>Organized Symbol Library</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+        <!-- Tutorial Tab -->
+        <div class="tab-content hidden" id="tutorial-tab">
+            <div class="container">
+                <div class="tutorial-box">
+                    <h3>How to Use the Pibby Rigs - Use Subtitles</h3>
+                    <div class="video-container">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/Nrbmv-f4m7Y" title="Pibby Rig Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="tutorial-info">
+                        <h4>Quick Start Guide</h4>
+                        <ol>
+                            <li>Download and extract the rig file</li>
+                            <li>Open the .fla file in Adobe Animate</li>
+                            <li>Follow the tutorial video for complete instructions</li>
+                            <li>Use the included layers and symbols as demonstrated</li>
+                            <li>Have fun animating!</li>
+                        </ol>
+                        <div class="tutorial-tips">
+                            <h4>Tips & Tricks</h4>
+                            <ul>
+                                <li>Use the premade poses for easier animation</li>
+                                <li>Take advantage of the symbol library for quick expression changes</li>
+                                <li>Remember to follow the terms of use when publishing your animations</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Bun Bun Rig Box -->
-        <div class="rig-box">
-            <div class="character">
-                <img src="images/bunbun.png" alt="Bun Bun Character">
-            </div>
-            <div class="rig-name">
-                <img src="images/bunbun-icon.png" alt="Bun Bun Icon" class="rig-icon">
-                <span>BunBun Rig</span>
-            </div>
-            <div class="download-buttons">
-                <div class="download-btn coming-soon">Coming Soon</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Comments Section -->
-    <div class="container">
-        <div class="rig-box" style="width: 90%; max-width: 800px;">
-            <div class="comments-section">
-                <h3>User Comments</h3>
-                <div class="comments-container">
-                    <!-- Comments will be loaded here by JavaScript -->
-                </div>
-                <div class="comment-form">
-                    <h4>Leave a Comment</h4>
-                    <input type="text" class="commenter-name-input" placeholder="Your Name">
-                    <textarea class="comment-input" placeholder="Your Comment"></textarea>
-                    <button class="submit-comment">Submit Comment</button>
+        <!-- Comments Tab -->
+        <div class="tab-content hidden" id="comments-tab">
+            <div class="container">
+                <div class="rig-box" style="width: 90%; max-width: 800px;">
+                    <div class="comments-section">
+                        <h3>User Comments</h3>
+                        <div class="comments-container">
+                            <!-- Comments will be loaded here by JavaScript -->
+                        </div>
+                        <div class="comment-form">
+                            <h4>Leave a Comment</h4>
+                            <input type="text" class="commenter-name-input" placeholder="Your Name">
+                            <textarea class="comment-input" placeholder="Your Comment"></textarea>
+                            <button class="submit-comment">Submit Comment</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
     
     <footer>
-        &copy; Studio VEGA | Learning With Pibby: Armageddon (2026) | Kxley's Rig Pack
+        &copy; Studio VEGA | Learning With Pibby: Armageddon (Series) | Kxley's Rig Pack
         <div class="footer-tos">
             <strong>Terms of Use:</strong> Credit Kxley • Don't claim as your own • No re-releases • No NSFW • No fake leaks
         </div>
@@ -128,5 +184,6 @@
     
     <!-- JavaScript -->
     <script src="js/script.js"></script>
+    <script src="js/cursor.js"></script>
 </body>
 </html>

@@ -866,6 +866,131 @@ footer {
     border-bottom: none;
 }
 
+/* Tutorial Tabs Container */
+.tutorial-tabs-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* Individual Tutorial Boxes */
+.tutorial-left,
+.tutorial-right {
+    flex: 1;
+    min-width: 45%;
+    max-width: 48%;
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 1024px) {
+    .tutorial-tabs-container {
+        flex-direction: column;
+    }
+    
+    .tutorial-left,
+    .tutorial-right {
+        max-width: 100%;
+        min-width: 100%;
+    }
+}
+
+/* Video Container Adjustments for Side-by-Side Layout */
+.tutorial-left .video-container iframe,
+.tutorial-right .video-container iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    max-width: 500px;
+}
+
+/* Tutorial Box Styling Adjustments */
+.tutorial-box h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.2em;
+}
+
+/* Darkness Download Section */
+.darkness-download-section {
+    background-color: #f0f8ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    text-align: center;
+    border: 2px dashed #007bff;
+}
+
+.darkness-download-section h4 {
+    color: #007bff;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+.darkness-download-section p {
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.download-darkness-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.download-darkness-btn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+}
+
+.download-darkness-btn:active {
+    transform: translateY(0);
+}
+
+.download-darkness-btn span {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.tutorial-info {
+    margin-top: 15px;
+}
+
+.tutorial-info h4 {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.tutorial-info ol,
+.tutorial-info ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.tutorial-info li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+.tutorial-tips {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
 /* Responsive Styles for Tutorial Tab */
 @media (max-width: 768px) {
     .nav-tabs {
@@ -889,7 +1014,7 @@ footer {
         font-size: 1.3rem;
     }
     
-    .tutorial-info li {
+    .tutorial_info li {
         font-size: 1rem;
     }
     

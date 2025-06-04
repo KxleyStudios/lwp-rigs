@@ -1,4 +1,4 @@
-// Tab Navigation Functionality
+3060// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Previous Firebase initialization code
     const firebaseConfig = {
@@ -230,19 +230,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Welcome Popup - ALWAYS SHOW (removed localStorage check)
-    // --- Create Welcome Popup ---
+    // Welcome Popup (without Pibby animation)
+    // Create the popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
-
+    
+    // Create the popup container
     const popup = document.createElement('div');
     popup.className = 'popup-container';
-
+    
+    // Create the popup content with rules and original message
     popup.innerHTML = `
         <div class="popup-content">
             <h2>Welcome to Pibby Rig Pack!</h2>
             <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
-
+            
             <div class="rules-container">
                 <h3>Terms of Use:</h3>
                 <ul class="rules-list">
@@ -257,9 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <li><strong>Subject to Change:</strong> These Terms of Use may be updated at any time by <strong>Kxley</strong>. Continued use of the content implies agreement to the most recent version.</li>
                 </ul>
             </div>
-
+            
             <p>Thank you for reading and have fun with my rigs!</p>
-
+            
             <div class="timer-container">
                 <p>Please read the rules carefully.</p>
                 <p>You can continue in: <span id="timer-countdown">120</span> seconds</p>
@@ -267,59 +269,56 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div id="timer-bar" class="timer-bar"></div>
                 </div>
             </div>
-
+            
             <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
         </div>
     `;
-
+    
+    // Append popup to overlay and overlay to body
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-
-    // Disable page scroll during popup
+    
+    // Disable page interaction while popup is active
     document.body.style.overflow = 'hidden';
-
-    // Fade in popup
+    
+    // Make popup visible with animation
     setTimeout(() => {
         overlay.style.opacity = '1';
     }, 300);
-
-    // --- Timer Logic ---
+    
+    // Timer functionality
     const timerEl = document.getElementById('timer-countdown');
     const timerBar = document.getElementById('timer-bar');
     const okButton = document.getElementById('popup-ok-btn');
-    let timeLeft = 120; // 2 minutes
-
+    let timeLeft = 120;
+    
+    // Update timer every second
     const timerInterval = setInterval(() => {
         timeLeft--;
         timerEl.textContent = timeLeft;
-
-        // Update bar width
+        
+        // Update timer bar width
         const percentLeft = (timeLeft / 120) * 100;
         timerBar.style.width = `${percentLeft}%`;
-
+        
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            timerEl.textContent = '0';
-
-            const continueMsg = document.createElement('p');
-            continueMsg.textContent = 'You can continue now!';
-            const container = timerEl.closest('.timer-container');
-            container.insertBefore(continueMsg, container.firstChild);
-
+            timerEl.parentElement.textContent = 'You can continue now!';
             okButton.disabled = false;
             okButton.classList.add('active');
         }
     }, 1000);
-
-    // --- Button Action ---
-    okButton.addEventListener('click', function () {
+    
+    // Add click event to the OK button
+    okButton.addEventListener('click', function() {
         if (okButton.disabled) return;
-
+        
+        // Fade out popup
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();
-            document.body.style.overflow = ''; // Re-enable scroll
-            // REMOVED: localStorage.setItem('pibbyWelcomeSeen', 'yes');
-        }, 300);
+            // Enable page interaction
+            document.body.style.overflow = '';
+        }, 300); // Remove after fade animation completes
     });
 });

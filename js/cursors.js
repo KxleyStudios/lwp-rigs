@@ -1,5 +1,14 @@
 // Custom Cursor Implementation
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if device supports hover (desktop/laptop) and has a pointer device
+    // This will exclude mobile devices, tablets, and touch-only devices
+    const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    
+    if (!isDesktop) {
+        console.log('Mobile/touch device detected. Custom cursor disabled.');
+        return; // Exit early for mobile devices
+    }
+    
     // Create cursor element
     const cursor = document.createElement('div');
     cursor.classList.add('cursor', 'cursor-default');

@@ -1,4 +1,4 @@
-// Tab Navigation Functionality
+3060// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Previous Firebase initialization code
     const firebaseConfig = {
@@ -230,96 +230,98 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Welcome Popup - ALWAYS SHOW (removed localStorage check)
-    // --- Create Welcome Popup ---
-    const overlay = document.createElement('div');
-    overlay.className = 'popup-overlay';
+    // Welcome Popup (without Pibby animation)
+    if (!localStorage.getItem('pibbyWelcomeSeen')) {
+        // --- Create Welcome Popup ---
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
 
-    const popup = document.createElement('div');
-    popup.className = 'popup-container';
+        const popup = document.createElement('div');
+        popup.className = 'popup-container';
 
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h2>Welcome to Pibby Rig Pack!</h2>
-            <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
+        popup.innerHTML = `
+            <div class="popup-content">
+                <h2>Welcome to Pibby Rig Pack!</h2>
+                <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
 
-            <div class="rules-container">
-                <h3>Terms of Use:</h3>
-                <ul class="rules-list">
-                    <li><strong>Mandatory Credit:</strong> You are required to give full and visible credit to <strong>Kxley</strong> in any use, post, showcase, or distribution. This is <u>not optional</u>. Failure to comply will result in a permanent ban from future use and may result in further action.</li>
-                    <li><strong>No Claiming as Your Own:</strong> You are strictly prohibited from claiming, presenting, or implying that this content was created by anyone other than <strong>Kxley</strong>. This includes renaming, editing, or repackaging for the purpose of misattribution.</li>
-                    <li><strong>No Re-Uploads or Re-Releases:</strong> You are not permitted to re-upload, redistribute, or re-release any part of this content on any platform, including but not limited to Discord, forums, mod sites, or file-sharing services. This applies even if credit is given.</li>
-                    <li><strong>No NSFW or Inappropriate Use:</strong> Under no circumstances may this content be used in any NSFW (Not Safe for Work), explicit, or offensive context. This includes sexual, violent, or otherwise inappropriate material.</li>
-                    <li><strong>No Fake Leaks or Manipulation:</strong> You may not fake leaks, create false versions, or mislead others using this content in any way. All impersonation, forgery, or attempts to confuse users will be met with severe action.</li>
-                    <li><strong>No Disrespect Towards Kxley:</strong> You are expected to treat <strong>Kxley</strong> with full respect. Harassment, hate, slander, or defamation against the creator will result in being blacklisted from all future content and reported if necessary.</li>
-                    <li><strong>No Monetization:</strong> You may not use this content in any commercial capacity, including paywalled content, NFTs, or any monetized service, without explicit written permission from <strong>Kxley</strong>.</li>
-                    <li><strong>Legal Enforcement:</strong> Violation of any of the above terms may result in legal action, DMCA takedowns, blacklisting, or community bans. These rules are binding and enforced.</li>
-                    <li><strong>Subject to Change:</strong> These Terms of Use may be updated at any time by <strong>Kxley</strong>. Continued use of the content implies agreement to the most recent version.</li>
-                </ul>
-            </div>
-
-            <p>Thank you for reading and have fun with my rigs!</p>
-
-            <div class="timer-container">
-                <p>Please read the rules carefully.</p>
-                <p>You can continue in: <span id="timer-countdown">120</span> seconds</p>
-                <div class="timer-bar-container">
-                    <div id="timer-bar" class="timer-bar"></div>
+                <div class="rules-container">
+                    <h3>Terms of Use:</h3>
+                    <ul class="rules-list">
+                        <li><strong>Mandatory Credit:</strong> You are required to give full and visible credit to <strong>Kxley</strong> in any use, post, showcase, or distribution. This is <u>not optional</u>. Failure to comply will result in a permanent ban from future use and may result in further action.</li>
+                        <li><strong>No Claiming as Your Own:</strong> You are strictly prohibited from claiming, presenting, or implying that this content was created by anyone other than <strong>Kxley</strong>. This includes renaming, editing, or repackaging for the purpose of misattribution.</li>
+                        <li><strong>No Re-Uploads or Re-Releases:</strong> You are not permitted to re-upload, redistribute, or re-release any part of this content on any platform, including but not limited to Discord, forums, mod sites, or file-sharing services. This applies even if credit is given.</li>
+                        <li><strong>No NSFW or Inappropriate Use:</strong> Under no circumstances may this content be used in any NSFW (Not Safe for Work), explicit, or offensive context. This includes sexual, violent, or otherwise inappropriate material.</li>
+                        <li><strong>No Fake Leaks or Manipulation:</strong> You may not fake leaks, create false versions, or mislead others using this content in any way. All impersonation, forgery, or attempts to confuse users will be met with severe action.</li>
+                        <li><strong>No Disrespect Towards Kxley:</strong> You are expected to treat <strong>Kxley</strong> with full respect. Harassment, hate, slander, or defamation against the creator will result in being blacklisted from all future content and reported if necessary.</li>
+                        <li><strong>No Monetization:</strong> You may not use this content in any commercial capacity, including paywalled content, NFTs, or any monetized service, without explicit written permission from <strong>Kxley</strong>.</li>
+                        <li><strong>Legal Enforcement:</strong> Violation of any of the above terms may result in legal action, DMCA takedowns, blacklisting, or community bans. These rules are binding and enforced.</li>
+                        <li><strong>Subject to Change:</strong> These Terms of Use may be updated at any time by <strong>Kxley</strong>. Continued use of the content implies agreement to the most recent version.</li>
+                    </ul>
                 </div>
+
+                <p>Thank you for reading and have fun with my rigs!</p>
+
+                <div class="timer-container">
+                    <p>Please read the rules carefully.</p>
+                    <p>You can continue in: <span id="timer-countdown">120</span> seconds</p>
+                    <div class="timer-bar-container">
+                        <div id="timer-bar" class="timer-bar"></div>
+                    </div>
+                </div>
+
+                <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
             </div>
+        `;
 
-            <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
-        </div>
-    `;
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
 
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
+        // Disable page scroll during popup
+        document.body.style.overflow = 'hidden';
 
-    // Disable page scroll during popup
-    document.body.style.overflow = 'hidden';
-
-    // Fade in popup
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-    }, 300);
-
-    // --- Timer Logic ---
-    const timerEl = document.getElementById('timer-countdown');
-    const timerBar = document.getElementById('timer-bar');
-    const okButton = document.getElementById('popup-ok-btn');
-    let timeLeft = 120; // 2 minutes
-
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = timeLeft;
-
-        // Update bar width
-        const percentLeft = (timeLeft / 120) * 100;
-        timerBar.style.width = `${percentLeft}%`;
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerEl.textContent = '0';
-
-            const continueMsg = document.createElement('p');
-            continueMsg.textContent = 'You can continue now!';
-            const container = timerEl.closest('.timer-container');
-            container.insertBefore(continueMsg, container.firstChild);
-
-            okButton.disabled = false;
-            okButton.classList.add('active');
-        }
-    }, 1000);
-
-    // --- Button Action ---
-    okButton.addEventListener('click', function () {
-        if (okButton.disabled) return;
-
-        overlay.style.opacity = '0';
+        // Fade in popup
         setTimeout(() => {
-            overlay.remove();
-            document.body.style.overflow = ''; // Re-enable scroll
-            // REMOVED: localStorage.setItem('pibbyWelcomeSeen', 'yes');
+            overlay.style.opacity = '1';
         }, 300);
-    });
+
+        // --- Timer Logic ---
+        const timerEl = document.getElementById('timer-countdown');
+        const timerBar = document.getElementById('timer-bar');
+        const okButton = document.getElementById('popup-ok-btn');
+        let timeLeft = 120; // 2 minutes
+
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+
+            // Update bar width
+            const percentLeft = (timeLeft / 120) * 100;
+            timerBar.style.width = `${percentLeft}%`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerEl.textContent = '0';
+
+                const continueMsg = document.createElement('p');
+                continueMsg.textContent = 'You can continue now!';
+                const container = timerEl.closest('.timer-container');
+                container.insertBefore(continueMsg, container.firstChild);
+
+                okButton.disabled = false;
+                okButton.classList.add('active');
+            }
+        }, 1000);
+
+        // --- Button Action ---
+        okButton.addEventListener('click', function () {
+            if (okButton.disabled) return;
+
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+                document.body.style.overflow = ''; // Re-enable scroll
+                localStorage.setItem('pibbyWelcomeSeen', 'yes'); // Remember user has seen popup
+            }, 300);
+        });
+    }
 });

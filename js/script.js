@@ -1,6 +1,5 @@
-3060// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Previous Firebase initialization code
+    // Initialize Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCdTCTqETv6Hx8Rx56pa4K2IJbCJINkGnY",
         authDomain: "pibby-rig-comments.firebaseapp.com",
@@ -13,78 +12,20 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const commentsCollection = db.collection('pibbyComments');
-    const forumsCollection = db.collection('pibbyForums');
-    
-    // Owner authentication state
-    let isOwnerAuthenticated = false;
-    
-    // Tab Navigation functionality
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Get the tab to activate
-            const tabToActivate = button.getAttribute('data-tab');
-            
-            // Deactivate all tabs
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.add('hidden'));
-            
-            // Activate the selected tab
-            button.classList.add('active');
-            document.getElementById(`${tabToActivate}-tab`).classList.remove('hidden');
-            
-            // If comments tab is selected, load comments
-            if(tabToActivate === 'comments') {
-                loadComments();
-            }
-        });
-    });
     
     // Changelog toggle functionality
-    const changelogToggles = document.querySelectorAll('.changelog-toggle');
-    const changelogContents = document.querySelectorAll('.changelog-content');
+    const changelogToggle = document.querySelector('.changelog-toggle');
+    const changelogContent = document.querySelector('.changelog-content');
     
-    changelogToggles.forEach((toggle, index) => {
-        const content = changelogContents[index];
-        if (toggle && content) {
-            toggle.addEventListener('click', function() {
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                    toggle.textContent = 'Show Changelog';
-                } else {
-                    content.style.display = 'block';
-                    toggle.textContent = 'Hide Changelog';
-                }
-            });
-        }
-    });
-    
-    // ========== CREATOR VERIFICATION SYSTEM ==========
-    // List of reserved usernames (case insensitive)
-    const reservedUsernames = [
-        'kxley', 
-        'kxleystudios', 
-        'kxley studios', 
-        'admin', 
-        'administrator', 
-        'mod', 
-        'moderator', 
-        'creator', 
-        'owner'
-    ];
-    
-    // Creator verification secret key
-    const creatorSecretKey = "<Kx839175087mDfS843wj8>";
-    
-    // Function to check if a username is reserved
-    function isReservedUsername(name) {
-        const nameLower = name.toLowerCase().trim();
-        return reservedUsernames.some(reserved => {
-            // Check for exact match or if the reserved name appears in the user input
-            return nameLower === reserved.toLowerCase() || 
-                   nameLower.includes(reserved.toLowerCase());
+    if (changelogToggle && changelogContent) {
+        changelogToggle.addEventListener('click', function() {
+            if (changelogContent.style.display === 'block') {
+                changelogContent.style.display = 'none';
+                changelogToggle.textContent = 'Show Changelog';
+            } else {
+                changelogContent.style.display = 'block';
+                changelogToggle.textContent = 'Hide Changelog';
+            }
         });
     }
     
@@ -95,69 +36,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const commentsContainer = document.querySelector('.comments-container');
     
     if (submitCommentBtn && commenterNameInput && commentInput && commentsContainer) {
-        // Only load comments if we're on the comments tab initially
-        if (!document.getElementById('comments-tab').classList.contains('hidden')) {
-            loadComments();
-        }
+        loadComments();
         
         submitCommentBtn.addEventListener('click', function() {
-            let name = commenterNameInput.value.trim();
+            const name = commenterNameInput.value.trim();
             const comment = commentInput.value.trim();
-            let isCreator = false;
             
-            // Check if name is empty
-            if (!name) {
-                alert('Please enter your name!');
-                return;
-            }
-            
-            // Check if comment is empty
-            if (!comment) {
-                alert('Please enter a comment!');
-                return;
-            }
-            
-            // Check for creator verification code in the name field
-            if (name.includes(creatorSecretKey)) {
-                // Extract the code and set name to creator name
-                name = name.replace(creatorSecretKey, '').trim();
-                if (!name) name = "KxleyStudios"; // Default if no other text
-                isCreator = true;
-            } 
-            // Check for reserved usernames if not the creator
-            else if (isReservedUsername(name)) {
-                alert('This username is reserved. Please choose a different name.');
-                return;
-            }
-            
-            submitCommentBtn.disabled = true;
-            submitCommentBtn.textContent = 'Submitting...';
-            
-            const now = new Date();
-            const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
-            
-            commentsCollection.add({
-                name: name,
-                content: comment,
-                date: dateStr,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                isCreator: isCreator // Store creator flag in database
-            })
-            .then(() => {
-                commenterNameInput.value = '';
-                commentInput.value = '';
+            if (name && comment) {
+                submitCommentBtn.disabled = true;
+                submitCommentBtn.textContent = 'Submitting...';
                 
-                submitCommentBtn.disabled = false;
-                submitCommentBtn.textContent = 'Submit Comment';
+                const now = new Date();
+                const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}, ${now.getFullYear()}`;
                 
-                loadComments();
-            })
-            .catch(error => {
-                console.error("Error adding comment: ", error);
-                alert("Sorry, there was an error submitting your comment. Please try again.");
-                submitCommentBtn.disabled = false;
-                submitCommentBtn.textContent = 'Submit Comment';
-            });
+                commentsCollection.add({
+                    name: name,
+                    content: comment,
+                    date: dateStr,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    commenterNameInput.value = '';
+                    commentInput.value = '';
+                    
+                    submitCommentBtn.disabled = false;
+                    submitCommentBtn.textContent = 'Submit Comment';
+                    
+                    loadComments();
+                })
+                .catch(error => {
+                    console.error("Error adding comment: ", error);
+                    alert("Sorry, there was an error submitting your comment. Please try again.");
+                    submitCommentBtn.disabled = false;
+                    submitCommentBtn.textContent = 'Submit Comment';
+                });
+            } else {
+                alert('Please enter both your name and comment!');
+            }
         });
     }
     
@@ -179,8 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const commentEl = createCommentElement(
                             commentData.name,
                             commentData.date,
-                            commentData.content,
-                            commentData.isCreator || false
+                            commentData.content
                         );
                         commentsContainer.appendChild(commentEl);
                     });
@@ -192,26 +106,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function createCommentElement(name, date, content, isCreator) {
+    function createCommentElement(name, date, content) {
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
-        
-        // Apply special styling for creator comments
-        if (isCreator) {
-            commentEl.classList.add('creator-comment');
-        }
-        
-        // Create the comment HTML structure
-        let nameDisplay = escapeHTML(name);
-        
-        // Add creator badge if this is the creator
-        if (isCreator) {
-            nameDisplay = `<span class="creator-name">${nameDisplay}</span> <span class="creator-badge">Creator</span>`;
-        }
-        
         commentEl.innerHTML = `
             <div class="comment-header">
-                <span class="commenter-name">${nameDisplay}</span>
+                <span class="commenter-name">${escapeHTML(name)}</span>
                 <span class="comment-date">${date}</span>
             </div>
             <div class="comment-content">
@@ -230,7 +130,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, '&#039;');
     }
     
-    // Welcome Popup (without Pibby animation)
+    // Create animated Pibby character
+    const createAnimatedPibby = () => {
+        const animatedPibby = document.createElement('div');
+        animatedPibby.className = 'animated-pibby';
+        
+        // Use the pibby.png image from images directory
+        const pibbyImg = document.createElement('img');
+        pibbyImg.src = 'images/pibby-fall.png';
+        pibbyImg.alt = 'Pibby Character';
+        
+        animatedPibby.appendChild(pibbyImg);
+        document.body.appendChild(animatedPibby);
+        
+        return animatedPibby;
+    };
+    
+    // Welcome Popup with Animated Pibby
     // Create the popup overlay
     const overlay = document.createElement('div');
     overlay.className = 'popup-overlay';
@@ -239,38 +155,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const popup = document.createElement('div');
     popup.className = 'popup-container';
     
-    // Create the popup content with rules and original message
+    // Create the popup content
     popup.innerHTML = `
         <div class="popup-content">
             <h2>Welcome to Pibby Rig Pack!</h2>
             <p>Hello! Thank you for checking out the Pibby Rig. You may be wondering why there isn't a Trailer Pallet. This is mainly because the trailer colors were only a lighting choice for Pibbys world!</p>
-            
-            <div class="rules-container">
-                <h3>Terms of Use:</h3>
-                <ul class="rules-list">
-                    <li><strong>Mandatory Credit:</strong> You are required to give full and visible credit to <strong>Kxley</strong> in any use, post, showcase, or distribution. This is <u>not optional</u>. Failure to comply will result in a permanent ban from future use and may result in further action.</li>
-                    <li><strong>No Claiming as Your Own:</strong> You are strictly prohibited from claiming, presenting, or implying that this content was created by anyone other than <strong>Kxley</strong>. This includes renaming, editing, or repackaging for the purpose of misattribution.</li>
-                    <li><strong>No Re-Uploads or Re-Releases:</strong> You are not permitted to re-upload, redistribute, or re-release any part of this content on any platform, including but not limited to Discord, forums, mod sites, or file-sharing services. This applies even if credit is given.</li>
-                    <li><strong>No NSFW or Inappropriate Use:</strong> Under no circumstances may this content be used in any NSFW (Not Safe for Work), explicit, or offensive context. This includes sexual, violent, or otherwise inappropriate material.</li>
-                    <li><strong>No Fake Leaks or Manipulation:</strong> You may not fake leaks, create false versions, or mislead others using this content in any way. All impersonation, forgery, or attempts to confuse users will be met with severe action.</li>
-                    <li><strong>No Disrespect Towards Kxley:</strong> You are expected to treat <strong>Kxley</strong> with full respect. Harassment, hate, slander, or defamation against the creator will result in being blacklisted from all future content and reported if necessary.</li>
-                    <li><strong>No Monetization:</strong> You may not use this content in any commercial capacity, including paywalled content, NFTs, or any monetized service, without explicit written permission from <strong>Kxley</strong>.</li>
-                    <li><strong>Legal Enforcement:</strong> Violation of any of the above terms may result in legal action, DMCA takedowns, blacklisting, or community bans. These rules are binding and enforced.</li>
-                    <li><strong>Subject to Change:</strong> These Terms of Use may be updated at any time by <strong>Kxley</strong>. Continued use of the content implies agreement to the most recent version.</li>
-                </ul>
-            </div>
-            
             <p>Thank you for reading and have fun with my rigs!</p>
-            
-            <div class="timer-container">
-                <p>Please read the rules carefully.</p>
-                <p>You can continue in: <span id="timer-countdown">120</span> seconds</p>
-                <div class="timer-bar-container">
-                    <div id="timer-bar" class="timer-bar"></div>
-                </div>
-            </div>
-            
-            <button id="popup-ok-btn" class="popup-button" disabled>OK</button>
+            <button id="popup-ok-btn" class="popup-button">OK</button>
         </div>
     `;
     
@@ -278,47 +169,60 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
     
-    // Disable page interaction while popup is active
-    document.body.style.overflow = 'hidden';
+    // Create animated Pibby
+    const animatedPibby = createAnimatedPibby();
     
-    // Make popup visible with animation
+    // Initial position for Pibby (above the viewport)
+    animatedPibby.style.position = 'fixed';
+    animatedPibby.style.left = '50%';
+    animatedPibby.style.top = '-150px'; // Start above the viewport
+    animatedPibby.style.transform = 'translateX(-50%)';
+    animatedPibby.style.zIndex = '1001'; // Above the popup
+    animatedPibby.style.transition = 'top 1s ease-in, opacity 0.5s ease';
+    
+    // Function to animate Pibby falling from ceiling
+    const animatePibbyFalling = () => {
+        setTimeout(() => {
+            animatedPibby.style.top = '100px'; // Fall to this position
+        }, 500);
+    };
+    
+    // Function to animate Pibby sliding up and then falling down
+    const animatePibbySlideUpAndFall = () => {
+        // First slide up quickly
+        animatedPibby.style.transition = 'top 0.5s ease-out';
+        animatedPibby.style.top = '-50px';
+        
+        // Then after popup is gone, fall down and fade out
+        setTimeout(() => {
+            animatedPibby.style.transition = 'top 1s ease-in, opacity 0.8s ease-out';
+            animatedPibby.style.top = '120vh'; // Fall beyond the bottom of viewport
+            animatedPibby.style.opacity = '0'; // Fade out while falling
+            
+            // Remove Pibby from DOM after animation completes
+            setTimeout(() => {
+                if (animatedPibby.parentNode) {
+                    animatedPibby.parentNode.removeChild(animatedPibby);
+                }
+            }, 1000);
+        }, 600);
+    };
+    
+    // Animate Pibby when popup appears
     setTimeout(() => {
         overlay.style.opacity = '1';
+        animatePibbyFalling();
     }, 300);
     
-    // Timer functionality
-    const timerEl = document.getElementById('timer-countdown');
-    const timerBar = document.getElementById('timer-bar');
-    const okButton = document.getElementById('popup-ok-btn');
-    let timeLeft = 120;
-    
-    // Update timer every second
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = timeLeft;
-        
-        // Update timer bar width
-        const percentLeft = (timeLeft / 120) * 100;
-        timerBar.style.width = `${percentLeft}%`;
-        
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerEl.parentElement.textContent = 'You can continue now!';
-            okButton.disabled = false;
-            okButton.classList.add('active');
-        }
-    }, 1000);
-    
     // Add click event to the OK button
-    okButton.addEventListener('click', function() {
-        if (okButton.disabled) return;
+    document.getElementById('popup-ok-btn').addEventListener('click', function() {
+        // Start slide up animation for Pibby
+        animatePibbySlideUpAndFall();
         
         // Fade out popup
         overlay.style.opacity = '0';
         setTimeout(() => {
             overlay.remove();
-            // Enable page interaction
-            document.body.style.overflow = '';
         }, 300); // Remove after fade animation completes
     });
 });

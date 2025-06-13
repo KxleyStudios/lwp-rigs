@@ -1,4 +1,4 @@
-3060// Tab Navigation Functionality
+// Tab Navigation Functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Previous Firebase initialization code
     const firebaseConfig = {
@@ -323,6 +323,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
 });
+
+// Function to download rig files directly
+window.downloadRig = function(rigName) {
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = `rigs/${rigName}.zip`;
+    link.download = `${rigName}.zip`; // This will be the downloaded file name
+
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Optional: Show a brief confirmation message
+    const buttons = document.querySelectorAll('.download-btn');
+    buttons.forEach(button => {
+        if (button.onclick && button.onclick.toString().includes(rigName)) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Downloaded!';
+            button.style.background = 'linear-gradient(135deg, #28a745, #1e7e34)';
+            button.disabled = true;
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        }
+    });
+};
 
 // Function to download the darkness.png image
 window.downloadDarknessImage = function() {

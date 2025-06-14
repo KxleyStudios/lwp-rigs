@@ -1394,3 +1394,32 @@ input, textarea, [contenteditable="true"], .selectable-text {
         max-height: 500px;
     }
 }
+
+/* Add a little bounce when clicking download buttons */
+.download-btn:active,
+.download-darkness-btn:active {
+    animation: bounce 0.2s;
+}
+
+@keyframes bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(0.96); }
+    60% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+/* Optional: Add a subtle border glow on hover for both download buttons */
+.download-btn:hover,
+.download-darkness-btn:hover {
+    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.15), 0 6px 16px rgba(0,0,0,0.3);
+}
+
+/* Optional: Make the download icon more visible */
+.download-btn:before {
+    color: #fff;
+    text-shadow: 0 2px 4px #44a08d;
+}
+.download-darkness-btn:before {
+    color: #fff;
+    text-shadow: 0 2px 4px #ee5a6f;
+}
